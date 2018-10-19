@@ -1,0 +1,9 @@
+Device 1: ArtNet [192.168.0.200]
+  port 0, IN, priority 100, RDM supported
+  port 1, IN, priority 100, RDM supported
+  port 2, IN, priority 100, RDM supported
+  port 3, IN, priority 100, RDM supported
+  port 0, OUT ArtNet Universe 0:0:0, patched to universe 0, RDM supported
+  port 1, OUT ArtNet Universe 0:0:1, patched to universe 1, RDM supported
+  port 2, OUT ArtNet Universe 0:0:2, patched to universe 2, RDM supported
+  port 3, OUT ArtNet Universe 0:0:3, patched to universe 3, RDM supported
