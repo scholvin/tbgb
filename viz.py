@@ -78,7 +78,7 @@ class Viz(object):
         if x >= 33 and x <= 35 and y >= 10 and y <= 13:
             return False
         if x == 38 and (y == 0 or y == 8 or y == 16):
-            return False;
+            return False
         return True
 
     def xform(self, x, y):
