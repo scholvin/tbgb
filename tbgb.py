@@ -29,6 +29,7 @@ bframe1.grid(row=1)
 bframe2 = Tkinter.Frame(root, height=60)
 bframe2.grid(row=2)
 
+# TODO: space these better and make them taller
 butts = []
 for u in range(0, 10):
     b = Tkinter.Button(bframe1, text="animation "+str(u+1))
@@ -41,7 +42,11 @@ for u in range(10, 20):
 butts[0].config(command=blackout, text="blackout")
 butts[1].config(command=whiteout, text="whiteout")
 
+# start with all black
 blackout()
+
+# bring the window to the front
 root.lift()
+
 root.mainloop()
 
