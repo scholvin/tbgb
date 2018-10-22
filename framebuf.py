@@ -31,4 +31,4 @@ class Framebuf(object):
         return self.WIDTH
 
     def height(self):
-        return self.WIDTH
+        return self.HEIGHT
