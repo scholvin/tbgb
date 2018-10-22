@@ -1,16 +1,17 @@
 import Tkinter
+import framebuf
 
 class Viz(object):
     def __init__(self, parent):
         self.height = 650
-        self.width = 1600
+        self.width = 1430
         self.xoffset = 36
         self.yoffset = 36
         self.xscale = 36
         self.yscale = 36
         self.radius = 6
         self.canvas = Tkinter.Canvas(parent, height=self.height, width=self.width, bg='#303030')
-        self.canvas.pack()
+        self.canvas.grid(row=0)
 
         # draw the T
         self.canvas.create_line(self.xform(-0.5, -0.5), self.xform(8.5, -0.5), self.xform(8.5, 2.5),  self.xform(5.5, 2.5), \
@@ -91,14 +92,21 @@ class Viz(object):
         hexcode = "#%02x%02x%02x" % (red, green, blue)
         return hexcode
 
-    def plot(self, x, y, red, green, blue):
+    def plotpix(self, x, y, red, green, blue):
         """plot the LED pixel at x,y (pixel space) with color r,g,b"""
         if not self.visible(x, y):
             return
         cx, cy = self.xform(x, y)
         r = self.radius
         self.canvas.create_oval(cx-r, cy-r, cx+r, cy+r, fill=self.rgb2color(red, green, blue))
+        #print "plot x="+str(x)+" y="+str(y)+" r="+str(red)+" g="+str(green)+" b="+str(blue)
 
+    def plottrip(self, x, y, triple):
+        self.plotpix(x, y, triple[0], triple[1], triple[2])
 
-
+    def render(self, fb):
+        """render the framebuf"""
+        for x in range(0, fb.width()):
+            for y in range(0, fb.height()):
+                self.plottrip(x, y, fb.get(x, y))
 
