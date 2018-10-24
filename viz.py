@@ -109,4 +109,5 @@ class Viz(object):
         for x in range(0, fb.width()):
             for y in range(0, fb.height()):
                 self.plottrip(x, y, fb.get(x, y))
+        self.canvas.update_idletasks()
 

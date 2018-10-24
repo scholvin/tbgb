@@ -4,8 +4,17 @@ import Tkinter
 import viz
 import framebuf
 
+import time
+
 XMAX = 39
 YMAX = 17
+
+T1 = range(0, 9)
+B2 = range(10, 19)
+G3 = range(20, 29)
+B4 = range(0, 39)
+
+TBGB_ALL = [T1, B2, G3, B4]
 
 fb = framebuf.Framebuf(XMAX, YMAX)
 root = Tkinter.Tk()
@@ -24,6 +33,49 @@ def whiteout():
             fb.set(x, y, [255, 255, 255])
     v.render(fb)
 
+def TBGBdemo():
+    def T():
+        for x in T1:
+            for y in range(YMAX):
+                fb.set(x, y, [255, 255, 255])
+        v.render(fb)
+
+    def B_1():
+        for x in B2:
+            for y in range(YMAX):
+                fb.set(x, y, [255, 255, 255])
+        v.render(fb)
+
+    def G():
+        for x in G3:
+            for y in range(YMAX):
+                fb.set(x, y, [255, 255, 255])
+        v.render(fb)
+
+    def B_2():
+        for x in B4:
+            for y in range(YMAX):
+                fb.set(x, y, [255, 255, 255])
+        v.render(fb)
+
+    def all():
+        T()
+        B_1()
+        G()
+        B_2()
+
+    root.after(0, blackout)
+    root.after(200, T)
+    root.after(400, B_1)
+    root.after(600, G)
+    root.after(800, B_2)
+    delay = 1000
+    for i in range(4):
+        root.after(delay, blackout)
+        delay += 200
+        root.after(delay, whiteout)
+        delay += 200
+
 bframe1 = Tkinter.Frame(root, height=60)
 bframe1.grid(row=1)
 bframe2 = Tkinter.Frame(root, height=60)
@@ -41,7 +93,7 @@ for u in range(10, 20):
 
 butts[0].config(command=blackout, text="blackout")
 butts[1].config(command=whiteout, text="whiteout")
-
+butts[2].config(command=TBGBdemo, text="TBGBdemo")
 # start with all black
 blackout()
 
