@@ -1,32 +1,58 @@
 #include <cairomm/context.h>
 #include <iostream>
 #include <chrono>
+#include <array>
 #include "viz.h"
 
-namespace {
-// hi Jeff
+namespace { // hi Jeff
+
+// TODO figure all this out on the fly someday
 static const int XOFFSET = 36;
 static const int YOFFSET = 36;
 static const int XSCALE = 36;
 static const int YSCALE = 36;
+static const int RADIUS = 6;
+static const int XMAX = 39;
+static const int YMAX = 17;
 
 struct P
 {
     double x, y;
 };
 
-// T
+// T (absolute x and y)
 const std::vector<P> T = { {-0.5, -0.5}, {8.5, -0.5}, {8.5, 2.5}, {5.5, 2.5},
                            {5.5, 16.5}, {2.5, 16.5}, {2.5, 2.5}, {-0.5, 2.5} };
-// outer part of B
+// outer part of B (relative x, absolute y)
 const std::vector<P> Bo = { {0, -0.5}, {7.5, -0.5}, {9, 1}, {9, 7.5},
                             {8.5, 8.0}, {9, 8.5}, {9, 15}, {7.5, 16.5}, {0, 16.5}, };
-// inner part of B
+// inner part of B (relative x and y)
 const std::vector<P> Bi = { {3, 0}, {6, 0}, {6, 4}, {3, 4} };
-// G
+// G (absolute x and y)
 const std::vector<P> G = { {21, -0.5}, {28.5, -0.5}, {28.5, 2.5}, {22.5, 2.5},
                            {22.5, 13.5}, {25.5, 13.5}, {25.5, 6.5}, {28.5, 6.5}, {28.5, 16.5},
                            {21, 16.5}, {19.5, 15.0}, {19.5, 1} };
+
+// x dimension is 1 larger to account for null-terminated string
+const std::array<std::array<char, XMAX+1>, YMAX> visible = {
+    "XXXXXXXXX XXXXXXXX   XXXXXXXX XXXXXXXX ",
+    "XXXXXXXXX XXXXXXXXX XXXXXXXXX XXXXXXXXX",
+    "XXXXXXXXX XXXXXXXXX XXXXXXXXX XXXXXXXXX",
+    "   XXX    XXX   XXX XXX       XXX   XXX",
+    "   XXX    XXX   XXX XXX       XXX   XXX",
+    "   XXX    XXX   XXX XXX       XXX   XXX",
+    "   XXX    XXX   XXX XXX       XXX   XXX",
+    "   XXX    XXXXXXXXX XXX   XXX XXXXXXXXX",
+    "   XXX    XXXXXXXX  XXX   XXX XXXXXXXX ",
+    "   XXX    XXXXXXXXX XXX   XXX XXXXXXXXX",
+    "   XXX    XXX   XXX XXX   XXX XXX   XXX",
+    "   XXX    XXX   XXX XXX   XXX XXX   XXX",
+    "   XXX    XXX   XXX XXX   XXX XXX   XXX",
+    "   XXX    XXX   XXX XXX   XXX XXX   XXX",
+    "   XXX    XXXXXXXXX XXXXXXXXX XXXXXXXXX",
+    "   XXX    XXXXXXXXX XXXXXXXXX XXXXXXXXX",
+    "   XXX    XXXXXXXX   XXXXXXXX XXXXXXXX "
+};
 }
 
 Viz::Viz(int width, int height)
@@ -150,6 +176,22 @@ Viz::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
     }
     cr->line_to(xformx(b+Bi[0].x), xformy(y0+Bi[0].y));
     cr->stroke();
+
+    // DRAW THE PIXELS!
+    for (int x = 0; x < XMAX; x++)
+    {
+        for (int y = 0; y < YMAX; y++)
+        {
+            if (visible[y][x] == ' ') // this looks backwards but it's right
+            {
+                continue;
+            }
+            cr->arc(xformx(x), xformy(y), RADIUS, 0, 2 * M_PI);
+            cr->set_source_rgb(1, 0, 0); // TODO get from framebuf, obvs
+            cr->fill_preserve();
+            cr->stroke();
+        }
+    }
 
     cr->set_source_rgba(0.337, 0.612, 0.117, 0.9);   // green
     cr->move_to(0, 0);
