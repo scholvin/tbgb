@@ -18,7 +18,7 @@ class MainWindow : public Gtk::Window
 public:
     MainWindow(Viz& viz) : m_viz(viz)
     {
-        set_default_size(1430, 650);
+        //set_default_size(1430, 650);
         set_title("TBGB");
         add(m_vbox);
         m_vbox.set_homogeneous(false);
@@ -67,9 +67,9 @@ private:
 int main(int argc, char *argv[])
 {
     // TODO add menu to quit
-    auto app = Gtk::Application::create(argc, argv, "com.tinybitofgiantsblood.tbgb"); // TODO what does this mean?
+    auto app = Gtk::Application::create(argc, argv, "com.tinybitofgiantsblood.tbgb");
 
-    Viz viz;
+    Viz viz(1430, 650);
     MainWindow window(viz);
 
     return app->run(window);
