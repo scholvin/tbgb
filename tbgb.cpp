@@ -2,7 +2,9 @@
 #include <array>
 #include <vector>
 #include <iostream>
-#include "viz.h" 
+#include "viz.h"
+#include "framebuf.h"
+#include "global.h"
 
 // TODO move me
 class Animations
@@ -69,7 +71,8 @@ int main(int argc, char *argv[])
     // TODO add menu to quit
     auto app = Gtk::Application::create(argc, argv, "com.tinybitofgiantsblood.tbgb");
 
-    Viz viz(1430, 650);
+    Framebuf fb;
+    Viz viz(fb);
     MainWindow window(viz);
 
     return app->run(window);

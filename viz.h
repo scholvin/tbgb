@@ -1,6 +1,7 @@
 #pragma once
 
 #include <gtkmm/drawingarea.h>
+#include "framebuf.h"
 
 // responsible for rendering a visualization of the framebuf on the screen for debugging
 // TODO pass the framebuf in at ctor
@@ -8,7 +9,7 @@
 class Viz : public Gtk::DrawingArea
 {
 public:
-    Viz(int width, int height);
+    Viz(Framebuf& fb);
     virtual ~Viz();
 
 protected:
@@ -17,4 +18,7 @@ protected:
 
     static double xformx(double x);
     static double xformy(double y);
+
+private:
+    Framebuf& m_fb;
 };

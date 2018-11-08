@@ -2,7 +2,9 @@
 #include <iostream>
 #include <chrono>
 #include <array>
+#include "global.h"
 #include "viz.h"
+
 
 namespace { // hi Jeff
 
@@ -12,8 +14,6 @@ static const int YOFFSET = 36;
 static const int XSCALE = 36;
 static const int YSCALE = 36;
 static const int RADIUS = 6;
-static const int XMAX = 39;
-static const int YMAX = 17;
 
 struct P
 {
@@ -34,7 +34,7 @@ const std::vector<P> G = { {21, -0.5}, {28.5, -0.5}, {28.5, 2.5}, {22.5, 2.5},
                            {21, 16.5}, {19.5, 15.0}, {19.5, 1} };
 
 // x dimension is 1 larger to account for null-terminated string
-const std::array<std::array<char, XMAX+1>, YMAX> visible = {
+const std::array<std::array<char, TBGB_XMAX+1>, TBGB_YMAX> visible = {
     "XXXXXXXXX XXXXXXXX   XXXXXXXX XXXXXXXX ",
     "XXXXXXXXX XXXXXXXXX XXXXXXXXX XXXXXXXXX",
     "XXXXXXXXX XXXXXXXXX XXXXXXXXX XXXXXXXXX",
@@ -55,9 +55,9 @@ const std::array<std::array<char, XMAX+1>, YMAX> visible = {
 };
 }
 
-Viz::Viz(int width, int height)
+Viz::Viz(Framebuf& fb) : m_fb(fb)
 {
-    set_size_request(width, height);
+    set_size_request(1430, 650); // TODO constants
 }
 
 Viz::~Viz()
@@ -74,9 +74,9 @@ Viz::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
     const int height = allocation.get_height();
     std::cout << "on_draw " << width << "x" << height << std::endl;
 
-    // set black background
+    // set gray background
     cr->set_line_width(1);
-    cr->set_source_rgb(0, 0, 0);
+    cr->set_source_rgb(0.25, 0.25, 0.25);
     cr->rectangle(0, 0, width, height);
     cr->fill();
     cr->stroke();
@@ -178,18 +178,21 @@ Viz::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
     cr->stroke();
 
     // DRAW THE PIXELS!
-    for (int x = 0; x < XMAX; x++)
     {
-        for (int y = 0; y < YMAX; y++)
+        std::lock_guard<std::mutex> lock(m_fb.mutex());
+        for (int x = 0; x < TBGB_XMAX; x++)
         {
-            if (visible[y][x] == ' ') // this looks backwards but it's right
+            for (int y = 0; y < TBGB_YMAX; y++)
             {
-                continue;
+                if (visible[y][x] == ' ') // this looks backwards but it's right
+                {
+                    continue;
+                }
+                cr->arc(xformx(x), xformy(y), RADIUS, 0, 2 * M_PI);
+                cr->set_source_rgb(m_fb.data(x, y).red, m_fb.data(x, y).green, m_fb.data(x, y).blue);
+                cr->fill_preserve();
+                cr->stroke();
             }
-            cr->arc(xformx(x), xformy(y), RADIUS, 0, 2 * M_PI);
-            cr->set_source_rgb(1, 0, 0); // TODO get from framebuf, obvs
-            cr->fill_preserve();
-            cr->stroke();
         }
     }
 
