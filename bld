@@ -1,3 +1,5 @@
+#!/bin/bash
 #TODO: make me a Makefile
+set -ex
 export PKG_CONFIG_PATH=/usr/local/Cellar/gtk+3/3.22.30/lib/pkgconfig
-g++ -std=c++17 tbgb.cpp viz.cpp -o tbgb `pkg-config --cflags --libs gtkmm-3.0`
+g++ -g -std=c++17 tbgb.cpp viz.cpp -o tbgb `pkg-config --cflags --libs gtkmm-3.0`
