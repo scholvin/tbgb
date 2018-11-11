@@ -37,4 +37,12 @@ public:
     int width() const { return TBGB_XMAX; }
     int height() const { return TBGB_YMAX; }
 
+    // draw a line from (x0,y0) to (x1,y1) in color data
+    void line(int x0, int y0, int x1, int y1, Data data);
+
+private:
+    static int sign(double x);
+    void lineLow(int x0, int y0, int x1, int y1, Data data);
+    void lineHigh(int x0, int y0, int x1, int y1, Data data);
+
 };

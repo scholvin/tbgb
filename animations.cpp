@@ -9,6 +9,7 @@ Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_f
     m_list.push_back(std::make_pair("blackout", std::bind(&Animations::blackout, this)));
     m_list.push_back(std::make_pair("whiteout", std::bind(&Animations::whiteout, this)));
     m_list.push_back(std::make_pair("TBGB", std::bind(&Animations::TBGB, this)));
+    m_list.push_back(std::make_pair("linetest", std::bind(&Animations::linetest, this)));
 }
 
 Animations::~Animations()
@@ -52,8 +53,6 @@ Animations::whiteout(void)
 void
 Animations::TBGB(void)
 {
-    std::cout << "animation: TBGB" << std::endl;
-
     blackout();
 
     const int DELAY = 250;
@@ -84,4 +83,17 @@ Animations::TBGB(void)
     SLEEPMS(DELAY);
 }
         
+void
+Animations::linetest(void)
+{
+    Framebuf::Data orange = { 1, 0.65, 0 };
+    Framebuf::Data green = { 0, 1, 0 };
+    {
+        LOCK;
+        m_fb.line(0, 0, TBGB_XMAX-1, TBGB_YMAX-1, orange);
+        m_fb.line(TBGB_XMAX-1, 0, 0, TBGB_YMAX-1, green);
+    }
+    render();
+}
+
 

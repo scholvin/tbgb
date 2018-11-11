@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
     Animations anim(fb, std::bind(&Viz::render, &viz), nullptr);
     MainWindow window(viz, anim.get_all());
 
-    auto ret =  app->run(window);
+    auto ret = app->run(window);
     std::cout << "exiting with code " << ret << std::endl;
     return ret;
 }

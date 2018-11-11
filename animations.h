@@ -25,6 +25,7 @@ public:
     void blackout();
     void whiteout();
     void TBGB();
+    void linetest();
 
 private:
     Framebuf& m_fb;
