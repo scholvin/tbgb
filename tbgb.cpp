@@ -29,8 +29,8 @@ public:
             {
                 m_buttons[i].set_label(animations[i].first);
                 m_buttons[i].signal_clicked().connect(
-                    sigc::bind<std::string, Animations::FuncType>(sigc::mem_fun(this, &MainWindow::change_animation), 
-                                                                  animations[i].first, animations[i].second));
+                    sigc::bind<std::string, Animations::AnimFuncType>(sigc::mem_fun(this, &MainWindow::change_animation), 
+                                                                      animations[i].first, animations[i].second));
             }
             else
             {
@@ -45,7 +45,7 @@ public:
         m_thread.detach();
     }
 
-    void change_animation(const std::string& name, Animations::FuncType animation)
+    void change_animation(const std::string& name, Animations::AnimFuncType animation)
     {
         std::cout << "change_animation to " << name << std::endl;
         m_current = animation;
@@ -82,7 +82,7 @@ private:
     Viz& m_viz;
 
     // current animation
-    Animations::FuncType m_current;
+    Animations::AnimFuncType m_current;
 
     // parallelism
     std::thread m_thread;
@@ -101,8 +101,8 @@ int main(int argc, char *argv[])
     auto app = Gtk::Application::create(argc, argv, "com.tinybitofgiantsblood.tbgb");
 
     Framebuf fb;
-    Animations anim(fb);
     Viz viz(fb);
+    Animations anim(fb, std::bind(&Viz::render, &viz), nullptr);
     MainWindow window(viz, anim.get_all());
 
     return app->run(window);

@@ -8,11 +8,13 @@
 class Animations
 {
 public:
-    typedef std::function<void(void)> FuncType;
-    typedef std::pair<std::string, FuncType> Identifier;
+    typedef std::function<void(void)> AnimFuncType;
+    typedef std::pair<std::string, AnimFuncType> Identifier;
     typedef std::vector<Identifier> AnimationList;;
 
-    Animations(Framebuf& fb);
+    typedef std::function<void(void)> RenderFuncType;
+
+    Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2);
 
     ~Animations();
 
@@ -25,5 +27,8 @@ public:
 private:
     Framebuf& m_fb;
     AnimationList m_list;
+    RenderFuncType m_r1, m_r2;
+
+    void render();
 };
 

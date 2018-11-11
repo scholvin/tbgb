@@ -64,6 +64,12 @@ Viz::~Viz()
 {
 }
 
+void
+Viz::render()
+{
+    queue_draw();
+}
+
 bool
 Viz::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
 {
