@@ -4,15 +4,16 @@
 #include <array>
 #include "global.h"
 
+// the internal frame buffer - a matrix of RGB triplets
 class Framebuf
 {
 public:
-struct Data
-{
-    double red;
-    double green;
-    double blue;
-};
+    struct Data
+    {
+        double red;
+        double green;
+        double blue;
+    };
 
 private:
     std::array<std::array<Data, TBGB_YMAX>, TBGB_XMAX> m_buf;

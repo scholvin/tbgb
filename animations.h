@@ -5,6 +5,7 @@
 #include <utility>
 #include "framebuf.h"
 
+// home to the animation code
 class Animations
 {
 public:
@@ -23,6 +24,7 @@ public:
     // the animations
     void blackout();
     void whiteout();
+    void TBGB();
 
 private:
     Framebuf& m_fb;

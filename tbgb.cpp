@@ -73,6 +73,7 @@ public:
 
     virtual ~MainWindow() 
     {
+        std::cout << "main window closing..." << std::endl;
         m_running = false;
         while (!m_done)
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -105,5 +106,7 @@ int main(int argc, char *argv[])
     Animations anim(fb, std::bind(&Viz::render, &viz), nullptr);
     MainWindow window(viz, anim.get_all());
 
-    return app->run(window);
+    auto ret =  app->run(window);
+    std::cout << "exiting with code " << ret << std::endl;
+    return ret;
 }
