@@ -13,7 +13,7 @@ static const int XOFFSET = 36;
 static const int YOFFSET = 36;
 static const int XSCALE = 36;
 static const int YSCALE = 36;
-static const int RADIUS = 6;
+static const int RECTANGLE = 14;
 
 struct P
 {
@@ -188,8 +188,9 @@ Viz::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
                 {
                     continue;
                 }
-                cr->arc(xformx(x), xformy(y), RADIUS, 0, 2 * M_PI);
+                //cr->arc(xformx(x), xformy(y), RADIUS, 0, 2 * M_PI);
                 cr->set_source_rgb(m_fb.data(x, y).red, m_fb.data(x, y).green, m_fb.data(x, y).blue);
+                cr->rectangle(xformx(x)-RECTANGLE/2, xformy(y)-RECTANGLE/2, RECTANGLE/2, RECTANGLE/2);
                 cr->fill_preserve();
                 cr->stroke();
             }
