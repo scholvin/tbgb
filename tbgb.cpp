@@ -4,21 +4,23 @@
 #include <iostream>
 #include "viz.h"
 #include "framebuf.h"
+#include "animations.h"
 #include "global.h"
 
-// TODO move me
-class Animations
+void change_animation(Animations::FuncType animation)
 {
-public:
-    static void blackout(int x) { std::cout << "blackout" << std::endl; }
-    static void whiteout(int x) { std::cout << "whiteout" << std::endl; }
-    static void not_impl(int x) { std::cout << "animation " << x << " not implemented yet" << std::endl; }
-};
+    std::cout << "new animation " << &animation << std::endl;
+}
+
+void not_impl(int i)
+{
+    std::cout << "animation " << i << " not iumplemented yet" << std::endl;
+}
 
 class MainWindow : public Gtk::Window
 {
 public:
-    MainWindow(Viz& viz) : m_viz(viz)
+    MainWindow(Viz& viz, const Animations::AnimationList& animations) : m_viz(viz)
     {
         //set_default_size(1430, 650);
         set_title("TBGB");
@@ -28,14 +30,6 @@ public:
         m_vbox.pack_end(m_grid, false, false);
         m_grid.set_hexpand(true);
 
-        // TODO move this out of this class, pass vector in as ref
-        typedef void (*AnimationFunc)(int);
-        std::vector<std::pair<std::string, AnimationFunc>> animations = 
-        {
-            std::make_pair("blackout", &Animations::blackout),
-            std::make_pair("whiteout", &Animations::whiteout)
-        };
-
         for (auto i = 0; i < 20; ++i)
         {
             // TODO bigger font on label text
@@ -43,18 +37,19 @@ public:
             if (i < animations.size())
             {
                 m_buttons[i].set_label(animations[i].first);
-                m_buttons[i].signal_clicked().connect(sigc::bind<int>(sigc::ptr_fun(animations[i].second), 0));
+                m_buttons[i].signal_clicked().connect(sigc::bind<Animations::FuncType>(sigc::ptr_fun(&change_animation), animations[i].second));
             }
             else
             {
                 m_buttons[i].set_label("animation " + std::to_string(i+1));
-                m_buttons[i].signal_clicked().connect(sigc::bind<int>(sigc::ptr_fun(&Animations::not_impl), i+1));
+                m_buttons[i].signal_clicked().connect(sigc::bind<int>(sigc::ptr_fun(&not_impl), i+1));
             }
             m_grid.attach(m_buttons[i], i % 10, i / 10, 1, 1);
         }
 
         show_all();
     }
+
     virtual ~MainWindow() { }
 
 private:
@@ -72,8 +67,9 @@ int main(int argc, char *argv[])
     auto app = Gtk::Application::create(argc, argv, "com.tinybitofgiantsblood.tbgb");
 
     Framebuf fb;
+    Animations anim(fb);
     Viz viz(fb);
-    MainWindow window(viz);
+    MainWindow window(viz, anim.get_all());
 
     return app->run(window);
 }

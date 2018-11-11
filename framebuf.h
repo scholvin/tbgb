@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mutex>
+#include <array>
 #include "global.h"
 
 class Framebuf
