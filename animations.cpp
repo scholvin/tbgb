@@ -3,13 +3,16 @@
 #include <iostream>
 #include <thread>
 
-Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_fb(fb), m_r1(r1), m_r2(r2)
+Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_fb(fb), m_r1(r1), m_r2(r2),
+    m_rainbow_lastc(0)
+
 {
     // don't love this pattern, but we gotta move along
     m_list.push_back(std::make_pair("blackout", std::bind(&Animations::blackout, this)));
     m_list.push_back(std::make_pair("whiteout", std::bind(&Animations::whiteout, this)));
     m_list.push_back(std::make_pair("TBGB", std::bind(&Animations::TBGB, this)));
     m_list.push_back(std::make_pair("linetest", std::bind(&Animations::linetest, this)));
+    m_list.push_back(std::make_pair("rainbow", std::bind(&Animations::rainbow, this)));
 }
 
 Animations::~Animations()
@@ -96,4 +99,31 @@ Animations::linetest(void)
     render();
 }
 
+void
+Animations::rainbow(void)
+{
+    // TODO make colors sane
+    Framebuf::Data red = { 1, 0, 0};
+    Framebuf::Data orange = { 1, 0.65, 0 };
+    Framebuf::Data yellow = { 1, 1, 0 };
+    Framebuf::Data green = { 0, 1, 0 };
+    Framebuf::Data blue = { 0, 0, 1 };
+    Framebuf::Data purple = {138/255.0 ,43/255.0 ,226/255.0};
+    Framebuf::Data black = { 0, 0, 0};
 
+    Framebuf::Data colors[] = { red, orange, yellow, green, blue, purple, black };
+    int CMAX = 6;
+    m_rainbow_lastc = (m_rainbow_lastc + 1 ) % CMAX;
+    int c = m_rainbow_lastc;
+
+    for (int x = 0; x < TBGB_XMAX + TBGB_YMAX - 2; x++)
+    {
+        {
+            LOCK;
+            m_fb.line(x, 0, 0, x, colors[c]);
+        }
+        render();
+        SLEEPMS(20);
+        c = (c + 1) % CMAX;
+    }
+}

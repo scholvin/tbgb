@@ -68,7 +68,7 @@ public:
 
     void not_impl(int i)
     {
-        std::cout << "animation " << i << " not iumplemented yet" << std::endl;
+        std::cout << "animation " << i << " not implemented yet" << std::endl;
     }
 
     virtual ~MainWindow() 

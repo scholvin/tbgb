@@ -26,6 +26,7 @@ public:
     void whiteout();
     void TBGB();
     void linetest();
+    void rainbow();
 
 private:
     Framebuf& m_fb;
@@ -33,5 +34,8 @@ private:
     RenderFuncType m_r1, m_r2;
 
     void render();
+
+    // animation specific stuff
+    int m_rainbow_lastc;
 };
 

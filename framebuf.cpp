@@ -7,16 +7,18 @@
 void
 Framebuf::line(int x0, int y0, int x1, int y1, Data data)
 {
+#if 0
     if (x0 >= TBGB_XMAX || x1 >= TBGB_XMAX || y0 >= TBGB_YMAX || y1 >= TBGB_YMAX ||
         x0 < 0 || x1 < 0 || y0 < 0 || y1 <0)
     {
         std::cout << "invalid coordinate for Framebuf::line (" << x0 << "," << y0 << ") (" << x1 << "," << y1 << ")"<< std::endl;
         return;
     }
+#endif
     if (x0 == x1)
     {
         // special case for vertical
-        for (int y = y0; y <= y1; ++y)
+        for (int y = y0; y <= y1; ++y) // TODO clip check horiz/vert
             m_buf[x0][y] = data;
         return;
     }
@@ -56,7 +58,11 @@ Framebuf::lineLow(int x0, int y0, int x1, int y1, Data data)
 
     for (int x = x0; x <= x1; x++)
     {
-        m_buf[x][y] = data;
+        if (x >= 0 && x < TBGB_XMAX && y >= 0 && y < TBGB_YMAX)
+        {
+            // silent clip
+            m_buf[x][y] = data;
+        }
         if (D > 0)
         {
             y += yi;
@@ -82,7 +88,11 @@ Framebuf::lineHigh(int x0, int y0, int x1, int y1, Data data)
 
     for (int y = y0; y <= y1; y++)
     {
-        m_buf[x][y] = data;
+        if (x >= 0 && x < TBGB_XMAX && y >= 0 && y < TBGB_YMAX)
+        {
+            // silent clip
+            m_buf[x][y] = data;
+        }
         if (D > 0)
         {
             x += xi;

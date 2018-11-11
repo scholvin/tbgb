@@ -78,7 +78,7 @@ Viz::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
     Gtk::Allocation allocation = get_allocation();
     const int width = allocation.get_width();
     const int height = allocation.get_height();
-    std::cout << "on_draw " << width << "x" << height << std::endl;
+    //std::cout << "on_draw " << width << "x" << height << std::endl;
 
     // set gray background
     cr->set_line_width(1);
@@ -203,14 +203,17 @@ Viz::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
         }
     }
 
+#if 0
+    // diagonal for debugging screen size/paint stuff
     cr->set_source_rgba(0.337, 0.612, 0.117, 0.9);   // green
     cr->move_to(0, 0);
     cr->line_to(width-1, height-1);
+#endif
     cr->stroke();
 
     auto end = std::chrono::system_clock::now();
     std::chrono::duration<double> diff = end - start;
-    std::cout << "elapsed on_draw time: " << diff.count() << std::endl;
+    //std::cout << "elapsed on_draw time: " << diff.count() << std::endl;
     return true;
 }
 
