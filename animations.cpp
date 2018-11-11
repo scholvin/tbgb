@@ -1,5 +1,6 @@
 #include "animations.h"
 #include <functional>
+#include <iostream>
 
 Animations::Animations(Framebuf& fb) : m_fb(fb)
 {
@@ -15,6 +16,7 @@ Animations::~Animations()
 void
 Animations::blackout(void)
 {
+    std::cout << "animation: blackout" << std::endl;
     std::lock_guard<std::mutex> lock(m_fb.mutex());
     for (int x = 0; x < TBGB_XMAX; x++)
         for (int y = 0; y < TBGB_YMAX; y++)
@@ -24,6 +26,7 @@ Animations::blackout(void)
 void
 Animations::whiteout(void)
 {
+    std::cout << "animation: whiteout" << std::endl;
     std::lock_guard<std::mutex> lock(m_fb.mutex());
     for (int x = 0; x < TBGB_XMAX; x++)
         for (int y = 0; y < TBGB_YMAX; y++)
