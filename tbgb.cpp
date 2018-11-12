@@ -5,6 +5,7 @@
 #include <chrono>
 #include <thread>
 #include "viz.h"
+#include "dmx.h"
 #include "framebuf.h"
 #include "animations.h"
 #include "global.h"
@@ -103,7 +104,8 @@ int main(int argc, char *argv[])
 
     Framebuf fb;
     Viz viz(fb);
-    Animations anim(fb, std::bind(&Viz::render, &viz), nullptr);
+    DMX dmx(fb);
+    Animations anim(fb, std::bind(&Viz::render, &viz), std::bind(&DMX::render, &dmx));
     MainWindow window(viz, anim.get_all());
 
     auto ret = app->run(window);
