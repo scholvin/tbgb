@@ -18,15 +18,17 @@ Framebuf::line(int x0, int y0, int x1, int y1, Data data)
     if (x0 == x1)
     {
         // special case for vertical
-        for (int y = y0; y <= y1; ++y) // TODO clip check horiz/vert
-            m_buf[x0][y] = data;
+        for (int y = y0; y <= y1; ++y)
+            if (x0 >= 0 && x0 < TBGB_XMAX && y >= 0 && y < TBGB_YMAX)
+                m_buf[x0][y] = data;
         return;
     }
     if (y0 == y1)
     {
         // special case for horizontal
         for (int x = x0; x <= x1; ++x)
-            m_buf[x][y0] = data;
+            if (x >= 0 && x < TBGB_XMAX && y0 >= 0 && y0 < TBGB_YMAX)
+                m_buf[x][y0] = data;
         return;
     }
 
