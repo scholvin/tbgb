@@ -18,7 +18,7 @@ tbgb: $(obj)
 
 .PHONY: clean
 clean:
-	rm -f $(obj) tbgb
+	rm -f $(obj) $(dep) tbgb
 
 .PHONY: cleandep
 cleandep:
