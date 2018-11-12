@@ -2,3 +2,7 @@
 tbgb
 tbgb.dSYM
 old
+CMakeCache.txt
+CMakeFiles
+cmake_install.cmake
+.*.swp
