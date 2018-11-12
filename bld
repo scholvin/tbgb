@@ -1,5 +1,5 @@
 #!/bin/bash
-#TODO: make me a Makefile
+# deprecated; use make
 set -ex
 export PKG_CONFIG_PATH=/usr/local/Cellar/gtk+3/3.22.30/lib/pkgconfig
 g++ -g -std=c++14 tbgb.cpp viz.cpp animations.cpp framebuf.cpp -o tbgb `pkg-config --cflags --libs gtkmm-3.0`
