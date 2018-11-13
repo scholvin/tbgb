@@ -195,7 +195,7 @@ Viz::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
                 {
                     continue;
                 }
-                //cr->arc(xformx(x), xformy(y), RADIUS, 0, 2 * M_PI);
+                //cr->arc(xformx(x), xformy(y), RADIUS, 0, 2 * M_PI); circle, but squares are faster
                 cr->set_source_rgb(m_fb.data(x, y).red, m_fb.data(x, y).green, m_fb.data(x, y).blue);
                 power += (m_fb.data(x, y).red + m_fb.data(x, y).green + m_fb.data(x, y).blue);
                 pixels++;
@@ -211,7 +211,7 @@ Viz::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
     snprintf(buf, sizeof(buf), "power: %6.2f%%", power / 3 / pixels * 100);
     //std::cout << "[" << buf << "] power=" << power << " pixels=" << pixels << " total=" << power / 3 / pixels << std::endl;
     cr->select_font_face("Courier", Cairo::FONT_SLANT_NORMAL, Cairo::FONT_WEIGHT_NORMAL);
-    cr->show_text(buf); // TODO make this stop moving around
+    cr->show_text(buf);
     cr->stroke();
 #if 0
     // diagonal for debugging screen size/paint stuff
