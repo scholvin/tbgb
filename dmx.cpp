@@ -4,7 +4,7 @@
 
 DMX::DMX(Framebuf& fb) : m_fb(fb)
 {
-    ola::InitLogging(ola::OLA_LOG_WARN, ola::OLA_LOG_STDERR); // TODO stdout?
+    ola::InitLogging(ola::OLA_LOG_WARN, ola::OLA_LOG_STDERR); // stdout not available
     m_buffer.Blackout();
     m_ola_client = new ola::client::StreamingClient(ola::client::StreamingClient::Options());
     if (!m_ola_client->Setup())

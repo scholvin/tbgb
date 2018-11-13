@@ -10,7 +10,7 @@
 #include "animations.h"
 #include "global.h"
 
-class MainWindow : public Gtk::Window
+class MainWindow : public Gtk::ApplicationWindow
 {
 public:
     MainWindow(Viz& viz, const Animations::AnimationList& animations) : m_viz(viz), m_current(nullptr), m_running(true), m_done(false)
@@ -24,7 +24,6 @@ public:
 
         for (auto i = 0; i < 20; ++i)
         {
-            // TODO bigger font on label text
             m_buttons[i].set_hexpand(true);
             if (i < animations.size())
             {
@@ -39,6 +38,7 @@ public:
                 m_buttons[i].signal_clicked().connect(sigc::bind<int>(sigc::mem_fun(this, &MainWindow::not_impl), i+1));
             }
             m_grid.attach(m_buttons[i], i % 10, i / 10, 1, 1);
+            m_buttons[i].get_child()->override_font(Pango::FontDescription("sans bold 18"));
         }
 
         show_all();

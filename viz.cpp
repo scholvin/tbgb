@@ -5,7 +5,6 @@
 #include "global.h"
 #include "viz.h"
 
-
 namespace { // hi Jeff
 
 // TODO figure all this out on the fly someday
@@ -184,6 +183,8 @@ Viz::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
     cr->stroke();
 
     // DRAW THE PIXELS!
+    double power = 0;
+    int pixels = 0;
     {
         std::lock_guard<std::mutex> lock(m_fb.mutex());
         for (int x = 0; x < TBGB_XMAX; x++)
@@ -196,24 +197,35 @@ Viz::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
                 }
                 //cr->arc(xformx(x), xformy(y), RADIUS, 0, 2 * M_PI);
                 cr->set_source_rgb(m_fb.data(x, y).red, m_fb.data(x, y).green, m_fb.data(x, y).blue);
+                power += (m_fb.data(x, y).red + m_fb.data(x, y).green + m_fb.data(x, y).blue);
+                pixels++;
                 cr->rectangle(xformx(x)-RECTANGLE/2, xformy(y)-RECTANGLE/2, RECTANGLE/2, RECTANGLE/2);
                 cr->fill_preserve();
                 cr->stroke();
             }
         }
     }
-
+    cr->move_to(10, xformy(17));
+    cr->set_source_rgb(1, 1, 1);
+    char buf[20];
+    snprintf(buf, sizeof(buf), "power: %6.2f%%", power / 3 / pixels * 100);
+    //std::cout << "[" << buf << "] power=" << power << " pixels=" << pixels << " total=" << power / 3 / pixels << std::endl;
+    cr->select_font_face("Courier", Cairo::FONT_SLANT_NORMAL, Cairo::FONT_WEIGHT_NORMAL);
+    cr->show_text(buf); // TODO make this stop moving around
+    cr->stroke();
 #if 0
     // diagonal for debugging screen size/paint stuff
     cr->set_source_rgba(0.337, 0.612, 0.117, 0.9);   // green
     cr->move_to(0, 0);
     cr->line_to(width-1, height-1);
 #endif
-    cr->stroke();
 
+#if 0
+    // timing
     auto end = std::chrono::system_clock::now();
     std::chrono::duration<double> diff = end - start;
-    //std::cout << "elapsed on_draw time: " << diff.count() << std::endl;
+    std::cout << "elapsed on_draw time: " << diff.count() << std::endl;
+#endif
     return true;
 }
 
