@@ -12,7 +12,10 @@ const int BCOUNT = 126;
 const int GCOUNT = 106;
 
 // irritating: x-y nature is reversed into row-col here
-const int Tdef[TBGB_YMAX][LETTER_WIDTH] = {
+
+typedef int LetterArray[TBGB_YMAX][LETTER_WIDTH];
+
+const LetterArray Tdef = {
     { 60, 61, 62, 63, 64, 65, 66, 67, 68 },
     { 59, 58, 57, 56, 55, 54, 53, 52, 51 },
     { 42, 43, 44, 45, 46, 47, 48, 49, 50 },
@@ -32,7 +35,7 @@ const int Tdef[TBGB_YMAX][LETTER_WIDTH] = {
     { -1, -1, -1,  0,  1,  2, -1, -1, -1 }
 };
 
-const int Bdef[TBGB_YMAX][LETTER_WIDTH] = {
+const LetterArray Bdef = {
     { 118, 119, 120, 121, 122, 123, 124, 125,  -1 },
     { 117, 116, 115, 114, 113, 112, 111, 110, 109 },
     {  88,  89,  90,  91,  92,  93,  94, 107, 108 },
@@ -52,7 +55,7 @@ const int Bdef[TBGB_YMAX][LETTER_WIDTH] = {
     {   0,   1,   2,   3,   4,   5,   6,   7,  -1 }
 };
 
-const int Gdef[TBGB_YMAX][LETTER_WIDTH] = {
+const LetterArray Gdef = {
     {  -1,  86,  87,  88,  89,  90,  91,  92,  93 },
     {  83,  84,  85,  99,  98,  97,  96,  95,  94 },
     {  82,  81,  80, 100, 101, 102, 103, 104, 105 },
@@ -71,6 +74,8 @@ const int Gdef[TBGB_YMAX][LETTER_WIDTH] = {
     {  31,  32,  33,  34,  35,  36,  37,  38,  22 },
     {  -1,  30,  29,  28,  27,  26,  25,  24,  23 }
 };
+
+const LetterArray* letters[] = {&Tdef, &Bdef, &Gdef, &Bdef};
 
 void check_grids()
 {
@@ -135,7 +140,7 @@ void check_grids()
 DMX::DMX(Framebuf& fb) : m_fb(fb)
 {
     check_grids();
-    ola::InitLogging(ola::OLA_LOG_WARN,   ola::OLA_LOG_STDERR); // stdout not available
+    ola::InitLogging(ola::OLA_LOG_WARN, ola::OLA_LOG_STDERR); // stdout not available
     m_buffer.Blackout();
     m_ola_client = new ola::client::StreamingClient(ola::client::StreamingClient::Options());
     if (!m_ola_client->Setup())
@@ -150,5 +155,46 @@ DMX::~DMX()
 void
 DMX::render(void)
 {
-    // m_ola_client->SendDmx(universe, m_buffer);
+    auto start = std::chrono::system_clock::now();
+
+    const unsigned CHAN_RED = 0;
+    const unsigned CHAN_GREEN = 1;
+    const unsigned CHAN_BLUE = 2;
+
+    std::lock_guard<std::mutex> lock(m_fb.mutex()); // TODO: finer grain on the mutex? also in viz then?
+    for (unsigned universe = 0; universe < 4; universe++) // universe = letter
+    {
+        m_buffer.Blackout();
+        int x0 = universe * (LETTER_WIDTH + 1);      // x start of this letter in Framebuf
+        for (int x = x0; x < x0 + LETTER_WIDTH; x++) // x and y travel in Framebuf space
+        {
+            for (int y = 0; y < TBGB_YMAX; y++)
+            {
+                int pixel = (*letters[universe])[y][x - x0]; // adjust back to letter space for x
+                if (pixel == -1)
+                    continue;
+                if (pixel < -1 || pixel > 126)
+                    throw std::logic_error("bad pixel reverse: u=" + std::to_string(universe) + " x=" + std::to_string(x) 
+                        + " y=" + std::to_string(y) + " pix=" + std::to_string(pixel));
+
+                uint8_t red = 255 * m_fb.data(x, y).red;
+                uint8_t green = 255 * m_fb.data(x, y).green;
+                uint8_t blue = 255 * m_fb.data(x, y).blue;
+
+                m_buffer.SetChannel(pixel * 3 + CHAN_RED, red);
+                m_buffer.SetChannel(pixel * 3 + CHAN_GREEN, green);
+                m_buffer.SetChannel(pixel * 3 + CHAN_BLUE, blue);
+
+                std::cout << "map: " << x << "," << y << "->" << pixel << " (" << (unsigned)red << "," 
+                          << (unsigned)green << "," << (unsigned)blue << ")" << std::endl;
+            }
+        }
+        std::cout << "sending universe " << universe << std::endl;
+        m_ola_client->SendDmx(universe, m_buffer);
+    }
+
+    // timing
+    auto end = std::chrono::system_clock::now();
+    std::chrono::duration<double> diff = end - start;
+    std::cout << "elapsed DMX::render time: " << diff.count() << std::endl;
 }
