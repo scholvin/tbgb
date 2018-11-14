@@ -75,7 +75,8 @@ const LetterArray Gdef = {
     {  -1,  30,  29,  28,  27,  26,  25,  24,  23 }
 };
 
-const LetterArray* letters[] = {&Tdef, &Bdef, &Gdef, &Bdef};
+const LetterArray* letters[] = { &Tdef, &Bdef, &Gdef, &Bdef };
+const int pixcounts[] = { TCOUNT, BCOUNT, GCOUNT, BCOUNT };
 
 void check_grids()
 {
@@ -173,7 +174,7 @@ DMX::render(void)
                 int pixel = (*letters[universe])[y][x - x0]; // adjust back to letter space for x
                 if (pixel == -1)
                     continue;
-                if (pixel < -1 || pixel > 126)
+                if (pixel < -1 || pixel > pixcounts[universe])
                     throw std::logic_error("bad pixel reverse: u=" + std::to_string(universe) + " x=" + std::to_string(x) 
                         + " y=" + std::to_string(y) + " pix=" + std::to_string(pixel));
 
@@ -189,7 +190,8 @@ DMX::render(void)
                 //          << (unsigned)green << "," << (unsigned)blue << ")" << std::endl;
             }
         }
-        std::cout << "sending universe " << universe << std::endl;
+        //std::cout << "sending universe " << universe << std::endl;
+        // TODO: figure out the blinking
         m_ola_client->SendDmx(universe, m_buffer);
     }
 

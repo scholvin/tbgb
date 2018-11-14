@@ -32,26 +32,6 @@ const std::vector<P> G = { {21, -0.5}, {28.5, -0.5}, {28.5, 2.5}, {22.5, 2.5},
                            {22.5, 13.5}, {25.5, 13.5}, {25.5, 6.5}, {28.5, 6.5}, {28.5, 16.5},
                            {21, 16.5}, {19.5, 15.0}, {19.5, 1} };
 
-// x dimension is 1 larger to account for null-terminated string
-const std::array<std::array<char, TBGB_XMAX+1>, TBGB_YMAX> visible = {
-    "XXXXXXXXX XXXXXXXX   XXXXXXXX XXXXXXXX ",
-    "XXXXXXXXX XXXXXXXXX XXXXXXXXX XXXXXXXXX",
-    "XXXXXXXXX XXXXXXXXX XXXXXXXXX XXXXXXXXX",
-    "   XXX    XXX   XXX XXX       XXX   XXX",
-    "   XXX    XXX   XXX XXX       XXX   XXX",
-    "   XXX    XXX   XXX XXX       XXX   XXX",
-    "   XXX    XXX   XXX XXX       XXX   XXX",
-    "   XXX    XXXXXXXXX XXX   XXX XXXXXXXXX",
-    "   XXX    XXXXXXXX  XXX   XXX XXXXXXXX ",
-    "   XXX    XXXXXXXXX XXX   XXX XXXXXXXXX",
-    "   XXX    XXX   XXX XXX   XXX XXX   XXX",
-    "   XXX    XXX   XXX XXX   XXX XXX   XXX",
-    "   XXX    XXX   XXX XXX   XXX XXX   XXX",
-    "   XXX    XXX   XXX XXX   XXX XXX   XXX",
-    "   XXX    XXXXXXXXX XXXXXXXXX XXXXXXXXX",
-    "   XXX    XXXXXXXXX XXXXXXXXX XXXXXXXXX",
-    "   XXX    XXXXXXXX   XXXXXXXX XXXXXXXX "
-};
 }
 
 Viz::Viz(Framebuf& fb) : m_fb(fb)
@@ -191,7 +171,7 @@ Viz::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
         {
             for (int y = 0; y < TBGB_YMAX; y++)
             {
-                if (visible[y][x] == ' ') // this looks backwards but it's right
+                if (!isVisible(x, y)) // this looks backwards but it's right
                 {
                     continue;
                 }

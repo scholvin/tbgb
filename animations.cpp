@@ -23,6 +23,7 @@ Animations::~Animations()
 void
 Animations::render()
 {
+    // TODO: make these interruptible
     if (m_r1) m_r1();
     if (m_r2) m_r2();
 }
@@ -139,6 +140,8 @@ Animations::T(void)
     {
         for (int x = 0; x < LETTER_WIDTH; x++)
         {
+            if (!isVisible(x, y))
+                continue;
             {
                 LOCK;
                 m_fb.data(x0, y0).red = m_fb.data(x0, y0).green = m_fb.data(x0, y0).blue = 0;
