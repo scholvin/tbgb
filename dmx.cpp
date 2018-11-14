@@ -16,9 +16,9 @@ const int GCOUNT = 106;
 typedef int LetterArray[TBGB_YMAX][LETTER_WIDTH];
 
 const LetterArray Tdef = {
-    { 60, 61, 62, 63, 64, 65, 66, 67, 68 },
-    { 59, 58, 57, 56, 55, 54, 53, 52, 51 },
-    { 42, 43, 44, 45, 46, 47, 48, 49, 50 },
+    { 46, 47, 50, 51, 56, 57, 62, 63, 68 },
+    { 45, 48, 49, 52, 55, 58, 61, 64, 67 },
+    { 44, 43, 42, 53, 54, 59, 60, 65, 66 },
     { -1, -1, -1, 41, 40, 39, -1, -1, -1 },
     { -1, -1, -1, 36, 37, 38, -1, -1, -1 },
     { -1, -1, -1, 35, 34, 33, -1, -1, -1 },
@@ -185,8 +185,8 @@ DMX::render(void)
                 m_buffer.SetChannel(pixel * 3 + CHAN_GREEN, green);
                 m_buffer.SetChannel(pixel * 3 + CHAN_BLUE, blue);
 
-                std::cout << "map: " << x << "," << y << "->" << pixel << " (" << (unsigned)red << "," 
-                          << (unsigned)green << "," << (unsigned)blue << ")" << std::endl;
+                //std::cout << "map: " << x << "," << y << "->" << pixel << " (" << (unsigned)red << "," 
+                //          << (unsigned)green << "," << (unsigned)blue << ")" << std::endl;
             }
         }
         std::cout << "sending universe " << universe << std::endl;

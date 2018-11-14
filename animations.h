@@ -27,6 +27,7 @@ public:
     void TBGB();
     void linetest();
     void rainbow();
+    void T();
 
 private:
     Framebuf& m_fb;

@@ -13,6 +13,7 @@ Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_f
     m_list.push_back(std::make_pair("TBGB", std::bind(&Animations::TBGB, this)));
     m_list.push_back(std::make_pair("linetest", std::bind(&Animations::linetest, this)));
     m_list.push_back(std::make_pair("rainbow", std::bind(&Animations::rainbow, this)));
+    m_list.push_back(std::make_pair("T", std::bind(&Animations::T, this)));
 }
 
 Animations::~Animations()
@@ -125,5 +126,28 @@ Animations::rainbow(void)
         render();
         SLEEPMS(20);
         c = (c + 1) % CMAX;
+    }
+}
+
+void
+Animations::T(void)
+{
+    blackout();
+    int x0 = -1;
+    int y0 = -1;
+    for (int y = 0; y < TBGB_YMAX; y++)
+    {
+        for (int x = 0; x < LETTER_WIDTH; x++)
+        {
+            {
+                LOCK;
+                m_fb.data(x0, y0).red = m_fb.data(x0, y0).green = m_fb.data(x0, y0).blue = 0;
+                m_fb.data(x, y).red = m_fb.data(x, y).green = m_fb.data(x, y).blue = 1;
+            }
+            render();
+            x0 = x;
+            y0 = y;
+            SLEEPMS(250);
+        }
     }
 }
