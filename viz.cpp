@@ -19,6 +19,7 @@ struct P
     double x, y;
 };
 
+// letter outlines
 // T (absolute x and y)
 const std::vector<P> T = { {-0.5, -0.5}, {8.5, -0.5}, {8.5, 2.5}, {5.5, 2.5},
                            {5.5, 16.5}, {2.5, 16.5}, {2.5, 2.5}, {-0.5, 2.5} };

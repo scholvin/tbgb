@@ -13,7 +13,11 @@ Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_f
     m_list.push_back(std::make_pair("TBGB", std::bind(&Animations::TBGB, this)));
     m_list.push_back(std::make_pair("linetest", std::bind(&Animations::linetest, this)));
     m_list.push_back(std::make_pair("rainbow", std::bind(&Animations::rainbow, this)));
-    m_list.push_back(std::make_pair("T", std::bind(&Animations::T, this)));
+    // these will go away after proving DMX layout, etc
+    m_list.push_back(std::make_pair("T1", std::bind(&Animations::one_letter_test, this, T1_START)));
+    m_list.push_back(std::make_pair("B2", std::bind(&Animations::one_letter_test, this, B2_START)));
+    m_list.push_back(std::make_pair("G3", std::bind(&Animations::one_letter_test, this, G3_START)));
+    m_list.push_back(std::make_pair("B4", std::bind(&Animations::one_letter_test, this, B4_START)));
 }
 
 Animations::~Animations()
@@ -62,7 +66,7 @@ Animations::TBGB(void)
 
     const int DELAY = 250;
 
-    const int lmax[] = {9, 19, 29, 39};
+    const int lmax[] = { T1_START+LETTER_WIDTH, B2_START+LETTER_WIDTH, G3_START+LETTER_WIDTH, B4_START+LETTER_WIDTH };
     int x = 0;
     for (int l = 0; l < 4; l++)
     {
@@ -131,14 +135,14 @@ Animations::rainbow(void)
 }
 
 void
-Animations::T(void)
+Animations::one_letter_test(int start)
 {
     blackout();
     int x0 = -1;
     int y0 = -1;
     for (int y = 0; y < TBGB_YMAX; y++)
     {
-        for (int x = 0; x < LETTER_WIDTH; x++)
+        for (int x = start; x < start+LETTER_WIDTH; x++)
         {
             if (!isVisible(x, y))
                 continue;

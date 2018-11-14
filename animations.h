@@ -21,18 +21,19 @@ public:
 
     const AnimationList& get_all() const { return m_list; }
 
-    // the animations
+    // the animations - I suppose these could be private since the binding is here
     void blackout();
     void whiteout();
     void TBGB();
     void linetest();
     void rainbow();
-    void T();
 
 private:
     Framebuf& m_fb;
     AnimationList m_list;
     RenderFuncType m_r1, m_r2;
+
+    void one_letter_test(int start);
 
     void render();
 
