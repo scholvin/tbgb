@@ -199,6 +199,7 @@ Viz::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
     cr->set_source_rgba(0.337, 0.612, 0.117, 0.9);   // green
     cr->move_to(0, 0);
     cr->line_to(width-1, height-1);
+    cr->stroke();
 #endif
 
 #if 0
