@@ -13,7 +13,7 @@
 class MainWindow : public Gtk::ApplicationWindow
 {
 public:
-    MainWindow(Viz& viz, const Animations::AnimationList& animations) : m_viz(viz), m_current(nullptr), m_running(true), m_done(false)
+    MainWindow(Viz& viz, Animations& animations) : m_viz(viz), m_animations(animations), m_current(nullptr), m_running(true), m_done(false)
     {
         set_title("TBGB");
         add(m_vbox);
@@ -22,15 +22,16 @@ public:
         m_vbox.pack_end(m_grid, false, false);
         m_grid.set_hexpand(true);
 
-        for (auto i = 0; i < 20; ++i)
+        auto it = animations.get_all().begin();
+        for (auto i = 0; i < 20; i++)
         {
             m_buttons[i].set_hexpand(true);
-            if (i < animations.size())
+            if (i < animations.get_all().size())
             {
-                m_buttons[i].set_label(animations[i].first);
+                m_buttons[i].set_label(it->first);
                 m_buttons[i].signal_clicked().connect(
                     sigc::bind<std::string, Animations::AnimFuncType>(sigc::mem_fun(this, &MainWindow::change_animation), 
-                                                                      animations[i].first, animations[i].second));
+                                                                      it->first, it->second));
             }
             else
             {
@@ -39,6 +40,7 @@ public:
             }
             m_grid.attach(m_buttons[i], i % 10, i / 10, 1, 1);
             m_buttons[i].get_child()->override_font(Pango::FontDescription("sans bold 18"));
+            it++;
         }
 
         show_all();
@@ -50,6 +52,7 @@ public:
     {
         std::cout << "change_animation to " << name << std::endl;
         m_current = animation;
+        m_animations.cancel();
     }
 
     void animation_runner(void)
@@ -82,6 +85,7 @@ public:
 
 private:
     Viz& m_viz;
+    Animations& m_animations;
 
     // current animation
     Animations::AnimFuncType m_current;
@@ -106,7 +110,7 @@ int main(int argc, char *argv[])
     Viz viz(fb);
     DMX dmx(fb);
     Animations anim(fb, std::bind(&Viz::render, &viz), std::bind(&DMX::render, &dmx));
-    MainWindow window(viz, anim.get_all());
+    MainWindow window(viz, anim);
 
     auto ret = app->run(window);
     std::cout << "exiting with code " << ret << std::endl;

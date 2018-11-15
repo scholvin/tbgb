@@ -4,6 +4,7 @@
 #include <thread>
 
 Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_fb(fb), m_r1(r1), m_r2(r2),
+    m_canceling(false),
     m_rainbow_lastc(0)
 
 {
@@ -11,8 +12,10 @@ Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_f
     m_list.push_back(std::make_pair("blackout", std::bind(&Animations::blackout, this)));
     m_list.push_back(std::make_pair("whiteout", std::bind(&Animations::whiteout, this)));
     m_list.push_back(std::make_pair("TBGB", std::bind(&Animations::TBGB, this)));
-    m_list.push_back(std::make_pair("linetest", std::bind(&Animations::linetest, this)));
     m_list.push_back(std::make_pair("rainbow", std::bind(&Animations::rainbow, this)));
+
+    // this will go away, after proving out the framebuf, etc
+    m_list.push_back(std::make_pair("linetest", std::bind(&Animations::linetest, this)));
     // these will go away after proving DMX layout, etc
     m_list.push_back(std::make_pair("T1", std::bind(&Animations::one_letter_test, this, T1_START)));
     m_list.push_back(std::make_pair("B2", std::bind(&Animations::one_letter_test, this, B2_START)));
@@ -24,18 +27,30 @@ Animations::~Animations()
 {
 }
 
-void
+bool
 Animations::render()
 {
-    // TODO: make these interruptible
+    if (m_canceling)
+    {
+        m_canceling = false;
+        return false;
+    }
     if (m_r1) m_r1();
     if (m_r2) m_r2();
+    return true;
+}
+
+void
+Animations::cancel()
+{
+    m_canceling = true;
 }
 
 #define LOCK std::lock_guard<std::mutex> lock(m_fb.mutex())
 #define SLEEPMS(x) std::this_thread::sleep_for(std::chrono::milliseconds(x))
+#define RENDER { if (!render()) return false; }
 
-void
+bool
 Animations::blackout(void)
 {
     {
@@ -44,10 +59,11 @@ Animations::blackout(void)
             for (int y = 0; y < TBGB_YMAX; y++)
                 m_fb.data(x, y).red = m_fb.data(x, y).green = m_fb.data(x, y).blue = 0;
     }
-    render();
+    RENDER;
+    return true;
 }
 
-void
+bool
 Animations::whiteout(void)
 {
     {
@@ -56,10 +72,11 @@ Animations::whiteout(void)
             for (int y = 0; y < TBGB_YMAX; y++)
                 m_fb.data(x, y).red = m_fb.data(x, y).green = m_fb.data(x, y).blue = 1;
     }
-    render();
+    RENDER;
+    return true;
 }
 
-void
+bool
 Animations::TBGB(void)
 {
     blackout();
@@ -78,21 +95,22 @@ Animations::TBGB(void)
                     m_fb.data(x, y).red = m_fb.data(x, y).green = m_fb.data(x, y).blue = 1;
             }
         }
-        render();
+        RENDER;
         SLEEPMS(DELAY);
     }
     for (int i = 0; i < 4; i++)
     {
-        blackout();
+        if (!blackout()) return false;
         SLEEPMS(DELAY);
-        whiteout();
+        if (!whiteout()) return false;
         SLEEPMS(DELAY);
     }
-    blackout();
+    if (!blackout()) return false;
     SLEEPMS(DELAY);
+    return true;
 }
         
-void
+bool
 Animations::linetest(void)
 {
     Framebuf::Data orange = { 1, 0.65, 0 };
@@ -102,10 +120,11 @@ Animations::linetest(void)
         m_fb.line(0, 0, TBGB_XMAX-1, TBGB_YMAX-1, orange);
         m_fb.line(TBGB_XMAX-1, 0, 0, TBGB_YMAX-1, green);
     }
-    render();
+    RENDER;
+    return true;
 }
 
-void
+bool
 Animations::rainbow(void)
 {
     // TODO make colors sane
@@ -128,16 +147,17 @@ Animations::rainbow(void)
             LOCK;
             m_fb.line(x, 0, 0, x, colors[c]);
         }
-        render();
+        RENDER;
         SLEEPMS(20);
         c = (c + 1) % CMAX;
     }
+    return true;
 }
 
-void
+bool
 Animations::one_letter_test(int start)
 {
-    blackout();
+    if (!blackout()) return false;
     int x0 = -1;
     int y0 = -1;
     for (int y = 0; y < TBGB_YMAX; y++)
@@ -151,10 +171,11 @@ Animations::one_letter_test(int start)
                 m_fb.data(x0, y0).red = m_fb.data(x0, y0).green = m_fb.data(x0, y0).blue = 0;
                 m_fb.data(x, y).red = m_fb.data(x, y).green = m_fb.data(x, y).blue = 1;
             }
-            render();
+            RENDER;
             x0 = x;
             y0 = y;
             SLEEPMS(250);
         }
     }
+    return true;
 }
