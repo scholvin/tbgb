@@ -21,6 +21,9 @@ public:
 
     const AnimationList& get_all() const { return m_list; }
 
+    // from the color window scroller
+    void set_global_colors(double red, double green, double blue);
+
     // stop the current animation - bail out on next render
     void cancel();
 
@@ -31,6 +34,7 @@ public:
     bool TBGB();
     bool linetest();
     bool rainbow();
+    bool colorwheel();
 
 private:
     Framebuf& m_fb;
@@ -42,7 +46,11 @@ private:
     // return true if it's OK to keep going, false if time to stop
     bool render();
 
+    // is an animation canceling?
     std::atomic<bool> m_canceling;
+
+    std::mutex m_colorMutex;
+    double m_globalRed, m_globalGreen, m_globalBlue;
 
     // animation specific stuff
     int m_rainbow_lastc;

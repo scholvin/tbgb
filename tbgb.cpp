@@ -10,10 +10,60 @@
 #include "animations.h"
 #include "global.h"
 
+class ColorWindow : public Gtk::Window
+{
+private:
+    Gtk::HBox m_hbox;
+    Gtk::VScale m_red;
+    Gtk::VScale m_green;
+    Gtk::VScale m_blue;
+    Animations& m_anim;
+public:
+    ColorWindow(Animations& anim) : m_anim(anim)
+    {
+        set_size_request(100, 400);
+
+        m_red.set_range(0, 1);
+        m_red.set_inverted(true);
+        m_red.set_increments(0.001, 0.1);
+        m_red.property_digits() = 3;
+        m_red.override_color(Gdk::RGBA("red"));
+        m_red.signal_change_value().connect(sigc::mem_fun(*this, &ColorWindow::on_color_change));
+
+        m_green.set_range(0, 1);
+        m_green.set_inverted(true);
+        m_green.set_increments(0.001, 0.1);
+        m_green.property_digits() = 3;
+        m_green.override_color(Gdk::RGBA("green"));
+        m_green.signal_change_value().connect(sigc::mem_fun(*this, &ColorWindow::on_color_change));
+
+        m_blue.set_range(0, 1);
+        m_blue.set_inverted(true);
+        m_blue.set_increments(0.001, 0.1);
+        m_blue.property_digits() = 3;
+        m_blue.override_color(Gdk::RGBA("blue"));
+        m_blue.signal_change_value().connect(sigc::mem_fun(*this, &ColorWindow::on_color_change));
+
+        m_hbox.add(m_red);
+        m_hbox.add(m_green);
+        m_hbox.add(m_blue);
+        add(m_hbox);
+        show_all_children();
+    }
+private:
+    bool on_color_change(Gtk::ScrollType type, double value)
+    {
+        //std::cout << "red=" << m_red.get_value() << " green=" << m_green.get_value() << " blue=" << m_blue.get_value() << std::endl;
+        m_anim.set_global_colors(m_red.get_value(), m_green.get_value(), m_blue.get_value());
+        return true;
+    }
+};
+
 class MainWindow : public Gtk::ApplicationWindow
 {
 public:
-    MainWindow(Viz& viz, Animations& animations) : m_viz(viz), m_animations(animations), m_current(nullptr), m_running(true), m_done(false)
+    MainWindow(Viz& viz, Animations& animations) : m_viz(viz), m_animations(animations), m_colorWin(animations),
+        m_current(nullptr), m_running(true), m_done(false)
     {
         set_title("TBGB");
         add(m_vbox);
@@ -44,6 +94,7 @@ public:
         }
 
         show_all();
+        m_colorWin.show();
         m_thread = std::thread(std::bind(&MainWindow::animation_runner, this));
         m_thread.detach();
     }
@@ -86,6 +137,7 @@ public:
 private:
     Viz& m_viz;
     Animations& m_animations;
+    ColorWindow m_colorWin;
 
     // current animation
     Animations::AnimFuncType m_current;

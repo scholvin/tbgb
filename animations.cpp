@@ -5,6 +5,9 @@
 
 Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_fb(fb), m_r1(r1), m_r2(r2),
     m_canceling(false),
+    m_globalRed(0),
+    m_globalGreen(0),
+    m_globalBlue(0),
     m_rainbow_lastc(0)
 
 {
@@ -13,6 +16,9 @@ Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_f
     m_list.push_back(std::make_pair("whiteout", std::bind(&Animations::whiteout, this)));
     m_list.push_back(std::make_pair("TBGB", std::bind(&Animations::TBGB, this)));
     m_list.push_back(std::make_pair("rainbow", std::bind(&Animations::rainbow, this)));
+
+    // this may or may not ever go away
+    m_list.push_back(std::make_pair("colorwheel", std::bind(&Animations::colorwheel, this)));
 
     // this will go away, after proving out the framebuf, etc
     m_list.push_back(std::make_pair("linetest", std::bind(&Animations::linetest, this)));
@@ -25,6 +31,15 @@ Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_f
 
 Animations::~Animations()
 {
+}
+
+void
+Animations::set_global_colors(double red, double green, double blue)
+{
+    std::lock_guard<std::mutex> lock(m_colorMutex);
+    m_globalRed = red;
+    m_globalGreen = green;
+    m_globalBlue = blue;
 }
 
 bool
@@ -151,6 +166,30 @@ Animations::rainbow(void)
         SLEEPMS(20);
         c = (c + 1) % CMAX;
     }
+    return true;
+}
+
+bool
+Animations::colorwheel(void)
+{
+    double red, green, blue;
+    {
+        std::scoped_lock<std::mutex> lock(m_colorMutex);
+        red = m_globalRed;
+        green = m_globalGreen;
+        blue = m_globalBlue;
+    }
+    {
+        LOCK;
+        for (int x = 0; x < TBGB_XMAX; x++)
+            for (int y = 0; y < TBGB_YMAX; y++)
+            {
+                m_fb.data(x, y).red = red;
+                m_fb.data(x, y).green = green;
+                m_fb.data(x, y).blue = blue;
+            }
+    }
+    RENDER;
     return true;
 }
 
