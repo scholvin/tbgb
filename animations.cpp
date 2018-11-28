@@ -71,8 +71,12 @@ Animations::blackout(void)
     {
         LOCK;
         for (int x = 0; x < TBGB_XMAX; x++)
+        {
             for (int y = 0; y < TBGB_YMAX; y++)
+            {
                 m_fb.data(x, y).red = m_fb.data(x, y).green = m_fb.data(x, y).blue = 0;
+            }
+        }
     }
     RENDER;
     return true;
@@ -84,8 +88,12 @@ Animations::whiteout(void)
     {
         LOCK;
         for (int x = 0; x < TBGB_XMAX; x++)
+        {
             for (int y = 0; y < TBGB_YMAX; y++)
+            {
                 m_fb.data(x, y).red = m_fb.data(x, y).green = m_fb.data(x, y).blue = 1;
+            }
+        }
     }
     RENDER;
     return true;
