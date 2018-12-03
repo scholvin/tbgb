@@ -27,6 +27,8 @@ Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_f
     m_list.push_back(std::make_pair("B2", std::bind(&Animations::one_letter_test, this, B2_START)));
     m_list.push_back(std::make_pair("G3", std::bind(&Animations::one_letter_test, this, G3_START)));
     m_list.push_back(std::make_pair("B4", std::bind(&Animations::one_letter_test, this, B4_START)));
+
+    m_list.push_back(std::make_pair("demo", std::bind(&Animations::demo, this)));
 }
 
 Animations::~Animations()
@@ -200,6 +202,54 @@ Animations::colorwheel(void)
     RENDER;
     return true;
 }
+
+bool
+Animations::demo(void)
+{
+    double red, green, blue;
+    {
+        std::scoped_lock<std::mutex> lock(m_colorMutex);
+        red = m_globalRed;
+        green = m_globalGreen;
+        blue = m_globalBlue;
+    }
+
+    const unsigned MILLIS_PER_BEAT = 420;
+    const unsigned OFF_TIME = 50;
+
+    const int lmax[] = { T1_START+LETTER_WIDTH, B2_START+LETTER_WIDTH, G3_START+LETTER_WIDTH, B4_START+LETTER_WIDTH };
+    int x = 0;
+    for (int l = 0; l < 4; l++)
+    {
+        {
+            LOCK;
+            for (; x < lmax[l]; x++)
+            {
+                for (int y = 0; y < TBGB_YMAX; y++)
+                {
+                    m_fb.data(x, y).red = red;
+                    m_fb.data(x, y).green = green;
+                    m_fb.data(x, y).blue = blue;
+                }
+            }
+        }
+        RENDER;
+        SLEEPMS(MILLIS_PER_BEAT - OFF_TIME);
+        blackout();
+        SLEEPMS(OFF_TIME);
+    }
+    for (int i = 0; i < 2; i++)
+    {
+        colorwheel();
+        SLEEPMS(MILLIS_PER_BEAT - OFF_TIME);
+        blackout();
+        SLEEPMS(OFF_TIME);
+    } 
+    SLEEPMS(1000);
+    return true;
+}
+
+
 
 bool
 Animations::one_letter_test(int start)

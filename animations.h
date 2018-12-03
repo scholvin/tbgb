@@ -35,6 +35,7 @@ public:
     bool linetest();
     bool rainbow();
     bool colorwheel();
+    bool demo();
 
 private:
     Framebuf& m_fb;
