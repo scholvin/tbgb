@@ -161,7 +161,6 @@ DMX::render(void)
     const unsigned CHAN_RED = 0;
     const unsigned CHAN_GREEN = 1;
     const unsigned CHAN_BLUE = 2;
-
     std::lock_guard<std::mutex> lock(m_fb.mutex()); // TODO: finer grain on the mutex? also in viz then?
     for (unsigned universe = 0; universe < 4; universe++) // universe = letter
     {
@@ -178,13 +177,9 @@ DMX::render(void)
                     throw std::logic_error("bad pixel reverse: u=" + std::to_string(universe) + " x=" + std::to_string(x) 
                         + " y=" + std::to_string(y) + " pix=" + std::to_string(pixel));
 
-                uint8_t red = 255 * m_fb.data(x, y).red;
-                uint8_t green = 255 * m_fb.data(x, y).green;
-                uint8_t blue = 255 * m_fb.data(x, y).blue;
-
-                m_buffer.SetChannel(pixel * 3 + CHAN_RED, red);
-                m_buffer.SetChannel(pixel * 3 + CHAN_GREEN, green);
-                m_buffer.SetChannel(pixel * 3 + CHAN_BLUE, blue);
+                m_buffer.SetChannel(pixel * 3 + CHAN_RED, m_fb.data(x, y).get_red() * 255);
+                m_buffer.SetChannel(pixel * 3 + CHAN_GREEN, m_fb.data(x, y).get_green() * 255);
+                m_buffer.SetChannel(pixel * 3 + CHAN_BLUE, m_fb.data(x, y).get_blue() * 255);
 
                 //std::cout << "map: " << x << "," << y << "->" << pixel << " (" << (unsigned)red << "," 
                 //          << (unsigned)green << "," << (unsigned)blue << ")" << std::endl;

@@ -76,7 +76,7 @@ Animations::blackout(void)
         {
             for (int y = 0; y < TBGB_YMAX; y++)
             {
-                m_fb.data(x, y).red = m_fb.data(x, y).green = m_fb.data(x, y).blue = 0;
+                m_fb.data(x, y) = Framebuf::BLACK;
             }
         }
     }
@@ -93,7 +93,7 @@ Animations::whiteout(void)
         {
             for (int y = 0; y < TBGB_YMAX; y++)
             {
-                m_fb.data(x, y).red = m_fb.data(x, y).green = m_fb.data(x, y).blue = 1;
+                m_fb.data(x, y) = Framebuf::WHITE;
             }
         }
     }
@@ -117,7 +117,9 @@ Animations::TBGB(void)
             for (; x < lmax[l]; x++)
             {
                 for (int y = 0; y < TBGB_YMAX; y++)
-                    m_fb.data(x, y).red = m_fb.data(x, y).green = m_fb.data(x, y).blue = 1;
+                {
+                    m_fb.data(x, y) = Framebuf::WHITE;
+                }
             }
         }
         RENDER;
@@ -138,12 +140,10 @@ Animations::TBGB(void)
 bool
 Animations::linetest(void)
 {
-    Framebuf::Data orange = { 1, 0.65, 0 };
-    Framebuf::Data green = { 0, 1, 0 };
     {
         LOCK;
-        m_fb.line(0, 0, TBGB_XMAX-1, TBGB_YMAX-1, orange);
-        m_fb.line(TBGB_XMAX-1, 0, 0, TBGB_YMAX-1, green);
+        m_fb.line(0, 0, TBGB_XMAX-1, TBGB_YMAX-1, Framebuf::ORANGE);
+        m_fb.line(TBGB_XMAX-1, 0, 0, TBGB_YMAX-1, Framebuf::GREEN);
     }
     RENDER;
     return true;
@@ -152,16 +152,8 @@ Animations::linetest(void)
 bool
 Animations::rainbow(void)
 {
-    // TODO make colors sane
-    Framebuf::Data red = { 1, 0, 0};
-    Framebuf::Data orange = { 1, 0.65, 0 };
-    Framebuf::Data yellow = { 1, 1, 0 };
-    Framebuf::Data green = { 0, 1, 0 };
-    Framebuf::Data blue = { 0, 0, 1 };
-    Framebuf::Data purple = {138/255.0 ,43/255.0 ,226/255.0};
-    Framebuf::Data black = { 0, 0, 0};
-
-    Framebuf::Data colors[] = { red, orange, yellow, green, blue, purple, black };
+    Framebuf::Color colors[] = { Framebuf::RED, Framebuf::ORANGE, Framebuf::YELLOW, Framebuf::GREEN,
+                                 Framebuf::BLUE, Framebuf::PURPLE, Framebuf::BLACK };
     int CMAX = 6;
     m_rainbow_lastc = (m_rainbow_lastc + 1 ) % CMAX;
     int c = m_rainbow_lastc;
@@ -194,9 +186,9 @@ Animations::colorwheel(void)
         for (int x = 0; x < TBGB_XMAX; x++)
             for (int y = 0; y < TBGB_YMAX; y++)
             {
-                m_fb.data(x, y).red = red;
-                m_fb.data(x, y).green = green;
-                m_fb.data(x, y).blue = blue;
+                m_fb.data(x, y).set_red(red);
+                m_fb.data(x, y).set_green(green);
+                m_fb.data(x, y).set_blue(blue);
             }
     }
     RENDER;
@@ -227,9 +219,9 @@ Animations::demo(void)
             {
                 for (int y = 0; y < TBGB_YMAX; y++)
                 {
-                    m_fb.data(x, y).red = red;
-                    m_fb.data(x, y).green = green;
-                    m_fb.data(x, y).blue = blue;
+                    m_fb.data(x, y).set_red(red);
+                    m_fb.data(x, y).set_green(green);
+                    m_fb.data(x, y).set_blue(blue);
                 }
             }
         }
@@ -250,7 +242,6 @@ Animations::demo(void)
 }
 
 
-
 bool
 Animations::one_letter_test(int start)
 {
@@ -265,8 +256,8 @@ Animations::one_letter_test(int start)
                 continue;
             {
                 LOCK;
-                m_fb.data(x0, y0).red = m_fb.data(x0, y0).green = m_fb.data(x0, y0).blue = 0;
-                m_fb.data(x, y).red = m_fb.data(x, y).green = m_fb.data(x, y).blue = 1;
+                m_fb.data(x0, y0) = Framebuf::BLACK;
+                m_fb.data(x, y) = Framebuf::WHITE;
             }
             RENDER;
             x0 = x;

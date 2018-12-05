@@ -177,8 +177,8 @@ Viz::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
                     continue;
                 }
                 //cr->arc(xformx(x), xformy(y), RADIUS, 0, 2 * M_PI); circle, but squares are faster
-                cr->set_source_rgb(m_fb.data(x, y).red, m_fb.data(x, y).green, m_fb.data(x, y).blue);
-                power += (m_fb.data(x, y).red + m_fb.data(x, y).green + m_fb.data(x, y).blue);
+                cr->set_source_rgb(m_fb.data(x, y).get_red(), m_fb.data(x, y).get_green(), m_fb.data(x, y).get_blue());
+                power += (m_fb.data(x, y).get_red() + m_fb.data(x, y).get_green() + m_fb.data(x, y).get_blue());
                 pixels++;
                 cr->rectangle(xformx(x)-RECTANGLE/2, xformy(y)-RECTANGLE/2, RECTANGLE/2, RECTANGLE/2);
                 cr->fill_preserve();
