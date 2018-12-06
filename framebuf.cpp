@@ -2,6 +2,8 @@
 #include <iostream>
 #include "framebuf.h"
 
+// https://www.reddit.com/r/spaceengineers/comments/3e0k38/rgb_values_for_various_types_of_realworld_lights/
+const Framebuf::Color Framebuf::INCANDESCENT(Gdk::RGBA("ffd6iaa")); // 255, 214, 170 TODO verify with devices
 const Framebuf::Color Framebuf::BLACK(Gdk::RGBA("black"));
 const Framebuf::Color Framebuf::WHITE(Gdk::RGBA("white"));
 const Framebuf::Color Framebuf::RED(Gdk::RGBA("red"));

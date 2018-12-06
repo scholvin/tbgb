@@ -8,9 +8,9 @@
 namespace { // hi Jeff
 
 // TODO figure all this out on the fly someday
-static const int XOFFSET = 36;
+static const int XOFFSET = 38;
 static const int YOFFSET = 36;
-static const int XSCALE = 36;
+static const int XSCALE = 33;
 static const int YSCALE = 36;
 static const int RECTANGLE = 14;
 
@@ -37,7 +37,7 @@ const std::vector<P> G = { {21, -0.5}, {28.5, -0.5}, {28.5, 2.5}, {22.5, 2.5},
 
 Viz::Viz(Framebuf& fb) : m_fb(fb)
 {
-    set_size_request(1430, 650); // TODO constants
+    set_size_request(1335, 650); // TODO constants
 }
 
 Viz::~Viz()

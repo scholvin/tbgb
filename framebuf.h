@@ -11,6 +11,8 @@ class Framebuf
 public:
     typedef Gdk::RGBA Color;
 
+    static const Color INCANDESCENT;
+
     static const Color BLACK;
     static const Color WHITE;
     static const Color RED;
