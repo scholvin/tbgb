@@ -5,15 +5,15 @@
 
 Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_fb(fb), m_r1(r1), m_r2(r2),
     m_canceling(false),
-    m_globalRed(0),
-    m_globalGreen(0),
-    m_globalBlue(0),
+    m_color(Framebuf::BLACK),
+    m_master(1),
     m_rainbow_lastc(0)
 
 {
     // don't love this pattern, but we gotta move along
-    m_list.push_back(std::make_pair("blackout", std::bind(&Animations::blackout, this)));
-    m_list.push_back(std::make_pair("whiteout", std::bind(&Animations::whiteout, this)));
+    m_list.push_back(std::make_tuple("blackout", std::bind(&Animations::blackout, this), nullptr));
+    m_list.push_back(std::make_tuple("whiteout", std::bind(&Animations::whiteout, this), &Framebuf::INCANDESCENT));
+#if 0    
     m_list.push_back(std::make_pair("TBGB", std::bind(&Animations::TBGB, this)));
     m_list.push_back(std::make_pair("rainbow", std::bind(&Animations::rainbow, this)));
 
@@ -29,6 +29,7 @@ Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_f
     m_list.push_back(std::make_pair("B4", std::bind(&Animations::one_letter_test, this, B4_START)));
 
     m_list.push_back(std::make_pair("demo", std::bind(&Animations::demo, this)));
+#endif
 }
 
 Animations::~Animations()
@@ -39,9 +40,35 @@ void
 Animations::set_global_colors(double red, double green, double blue)
 {
     std::lock_guard<std::mutex> lock(m_colorMutex);
-    m_globalRed = red;
-    m_globalGreen = green;
-    m_globalBlue = blue;
+    m_color.set_red(red);
+    m_color.set_green(green);
+    m_color.set_blue(blue);
+}
+
+Framebuf::Color
+Animations::get_global_color()
+{
+    Framebuf::Color ret;
+    double mult;
+    {
+        std::lock_guard<std::mutex> lock(m_colorMutex);
+        ret = m_color;
+    }
+    {
+        std::lock_guard<std::mutex> lock(m_masterMutex);
+        mult = m_master;
+    }
+    ret.set_red(mult * ret.get_red());
+    ret.set_green(mult * ret.get_green());
+    ret.set_blue(mult * ret.get_blue());
+    return ret;
+}
+
+void
+Animations::set_master(double master)
+{
+    std::lock_guard<std::mutex> lock(m_masterMutex);
+    m_master = master;
 }
 
 bool
@@ -76,6 +103,7 @@ Animations::blackout(void)
         {
             for (int y = 0; y < TBGB_YMAX; y++)
             {
+                // this is hardcoded, don't consult the global color
                 m_fb.data(x, y) = Framebuf::BLACK;
             }
         }
@@ -93,7 +121,7 @@ Animations::whiteout(void)
         {
             for (int y = 0; y < TBGB_YMAX; y++)
             {
-                m_fb.data(x, y) = Framebuf::WHITE;
+                m_fb.data(x, y) = get_global_color();
             }
         }
     }
@@ -170,7 +198,7 @@ Animations::rainbow(void)
     }
     return true;
 }
-
+#if 0
 bool
 Animations::colorwheel(void)
 {
@@ -241,7 +269,7 @@ Animations::demo(void)
     return true;
 }
 
-
+#endif
 bool
 Animations::one_letter_test(int start)
 {

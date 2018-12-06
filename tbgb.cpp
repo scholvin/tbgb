@@ -29,21 +29,21 @@ public:
         m_red.set_increments(0.001, 0.1);
         m_red.property_digits() = 3;
         m_red.override_color(Gdk::RGBA("red"));
-        m_red.signal_change_value().connect(sigc::mem_fun(*this, &ControlWidget::on_color_change));
+        m_red.signal_value_changed().connect(sigc::mem_fun(*this, &ControlWidget::on_color_change));
 
         m_green.set_range(0, 1);
         m_green.set_inverted(true);
         m_green.set_increments(0.001, 0.1);
         m_green.property_digits() = 3;
         m_green.override_color(Gdk::RGBA("green"));
-        m_green.signal_change_value().connect(sigc::mem_fun(*this, &ControlWidget::on_color_change));
+        m_green.signal_value_changed().connect(sigc::mem_fun(*this, &ControlWidget::on_color_change));
 
         m_blue.set_range(0, 1);
         m_blue.set_inverted(true);
         m_blue.set_increments(0.001, 0.1);
         m_blue.property_digits() = 3;
         m_blue.override_color(Gdk::RGBA("blue"));
-        m_blue.signal_change_value().connect(sigc::mem_fun(*this, &ControlWidget::on_color_change));
+        m_blue.signal_value_changed().connect(sigc::mem_fun(*this, &ControlWidget::on_color_change));
 
         m_colors.add(m_red);
         m_colors.add(m_green);
@@ -56,7 +56,7 @@ public:
         m_master.property_digits() = 3;
         m_master.set_value_pos(Gtk::POS_BOTTOM);
         m_master.set_value(1.0);
-        m_master.signal_change_value().connect(sigc::mem_fun(*this, &ControlWidget::on_master_change));
+        m_master.signal_value_changed().connect(sigc::mem_fun(*this, &ControlWidget::on_master_change));
         add(m_master);
         show_all_children();
     }
@@ -68,17 +68,25 @@ public:
         m_blue.set_value(color.get_blue());
     }
 
+    Framebuf::Color get_color() const
+    {
+        Framebuf::Color ret;
+        ret.set_red(m_red.get_value());
+        ret.set_green(m_green.get_value());
+        ret.set_blue(m_blue.get_value());
+        return ret;
+    }
+
 private:
-    bool on_color_change(Gtk::ScrollType type, double value)
+    void on_color_change()
     {
         //std::cout << "red=" << m_red.get_value() << " green=" << m_green.get_value() << " blue=" << m_blue.get_value() << std::endl;
         m_anim.set_global_colors(m_red.get_value(), m_green.get_value(), m_blue.get_value());
-        return true;
     }
 
-    bool on_master_change(Gtk::ScrollType type, double value)
+    void on_master_change()
     {
-        return true;
+        m_anim.set_master(m_master.get_value());
     }
 };
 
@@ -106,10 +114,10 @@ public:
             m_buttons[i].set_hexpand(true);
             if (i < animations.get_all().size())
             {
-                m_buttons[i].set_label(it->first);
+                m_buttons[i].set_label(std::get<0>(*it));
                 m_buttons[i].signal_clicked().connect(
                     sigc::bind<std::string, Animations::AnimFuncType>(sigc::mem_fun(this, &MainWindow::change_animation), 
-                                                                      it->first, it->second));
+                                                                      std::get<0>(*it), std::get<1>(*it), std::get<2>(*it)));
             }
             else
             {
@@ -126,9 +134,18 @@ public:
         m_thread.detach();
     }
 
-    void change_animation(const std::string& name, Animations::AnimFuncType animation)
+    void change_animation(const std::string& name, Animations::AnimFuncType animation, const Framebuf::Color* color)
     {
         std::cout << "change_animation to " << name << std::endl;
+        if (color)
+        {
+            // TODO enable shit
+            m_control.set_color(*color);
+        }
+        else
+        {
+            // TODO disable shit
+        }
         m_current = animation;
         m_animations.cancel();
     }

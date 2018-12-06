@@ -10,7 +10,7 @@ class Animations
 {
 public:
     typedef std::function<bool(void)> AnimFuncType;
-    typedef std::pair<std::string, AnimFuncType> Identifier;
+    typedef std::tuple<std::string, AnimFuncType, const Framebuf::Color*> Identifier;
     typedef std::vector<Identifier> AnimationList;;
 
     typedef std::function<void(void)> RenderFuncType;
@@ -23,6 +23,7 @@ public:
 
     // from the color window scroller
     void set_global_colors(double red, double green, double blue);
+    void set_master(double master);
 
     // stop the current animation - bail out on next render
     void cancel();
@@ -47,11 +48,17 @@ private:
     // return true if it's OK to keep going, false if time to stop
     bool render();
 
+    // apply the master times the color
+    Framebuf::Color get_global_color();
+
     // is an animation canceling?
     std::atomic<bool> m_canceling;
 
     std::mutex m_colorMutex;
-    double m_globalRed, m_globalGreen, m_globalBlue;
+    Gdk::RGBA m_color;
+
+    std::mutex m_masterMutex;
+    double m_master;
 
     // animation specific stuff
     int m_rainbow_lastc;
