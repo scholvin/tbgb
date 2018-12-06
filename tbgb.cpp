@@ -77,6 +77,20 @@ public:
         return ret;
     }
 
+    void enable()
+    {
+        m_red.set_sensitive(true);
+        m_green.set_sensitive(true);
+        m_blue.set_sensitive(true);
+    }
+
+    void disable()
+    {
+        m_red.set_sensitive(false);
+        m_green.set_sensitive(false);
+        m_blue.set_sensitive(false);
+    }
+
 private:
     void on_color_change()
     {
@@ -139,12 +153,12 @@ public:
         std::cout << "change_animation to " << name << std::endl;
         if (color)
         {
-            // TODO enable shit
+            m_control.enable();
             m_control.set_color(*color);
         }
         else
         {
-            // TODO disable shit
+            m_control.disable();
         }
         m_current = animation;
         m_animations.cancel();
