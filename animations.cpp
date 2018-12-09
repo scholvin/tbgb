@@ -7,6 +7,7 @@ namespace {
     const int FLASH_DELAY = 250;
     const int FOO_TO_FULL_STEPS = 100;
     const int FOO_TO_FULL_DELAY = 10;
+    const int TOP_DOWN_WAVE_DELAY = 50;
 }
 
 Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_fb(fb), m_r1(r1), m_r2(r2),
@@ -22,6 +23,7 @@ Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_f
     m_list.push_back(std::make_tuple("flash", std::bind(&Animations::flash, this), &Framebuf::INCANDESCENT));
     m_list.push_back(std::make_tuple("0 to 100", std::bind(&Animations::foo_to_full, this, 0.0), &Framebuf::INCANDESCENT));
     m_list.push_back(std::make_tuple("50 to 100", std::bind(&Animations::foo_to_full, this, 0.5), &Framebuf::INCANDESCENT));
+    m_list.push_back(std::make_tuple("top down", std::bind(&Animations::top_down_wave, this), &Framebuf::INCANDESCENT));
 
 
 #if 0    
@@ -167,6 +169,26 @@ Animations::foo_to_full(double start)
         }
         RENDER;
         SLEEPMS(FOO_TO_FULL_DELAY);
+    }
+    return true;
+}
+
+bool
+Animations::top_down_wave(void)
+{
+    if (!blackout()) return false;
+    SLEEPMS(TOP_DOWN_WAVE_DELAY);
+    for (int y = 0; y < TBGB_YMAX; y++)
+    {
+        {
+            LOCK;
+            for (int x = 0; x < TBGB_XMAX; x++)
+            {
+                m_fb.data(x, y) = get_global_color();
+            }
+        }
+        RENDER;
+        SLEEPMS(TOP_DOWN_WAVE_DELAY);
     }
     return true;
 }
