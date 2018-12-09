@@ -3,6 +3,10 @@
 #include <iostream>
 #include <thread>
 
+namespace {
+    const int FLASH_DELAY = 250;
+}
+
 Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_fb(fb), m_r1(r1), m_r2(r2),
     m_canceling(false),
     m_color(Framebuf::BLACK),
@@ -13,6 +17,8 @@ Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_f
     // don't love this pattern, but we gotta move along
     m_list.push_back(std::make_tuple("blackout", std::bind(&Animations::blackout, this), nullptr));
     m_list.push_back(std::make_tuple("whiteout", std::bind(&Animations::whiteout, this), &Framebuf::INCANDESCENT));
+    m_list.push_back(std::make_tuple("flash", std::bind(&Animations::flash, this), &Framebuf::INCANDESCENT));
+
 #if 0    
     m_list.push_back(std::make_pair("TBGB", std::bind(&Animations::TBGB, this)));
     m_list.push_back(std::make_pair("rainbow", std::bind(&Animations::rainbow, this)));
@@ -126,6 +132,16 @@ Animations::whiteout(void)
         }
     }
     RENDER;
+    return true;
+}
+
+bool
+Animations::flash(void)
+{
+    if (!whiteout()) return false;
+    SLEEPMS(FLASH_DELAY);
+    if (!blackout()) return false;
+    SLEEPMS(FLASH_DELAY);
     return true;
 }
 

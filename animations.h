@@ -32,7 +32,11 @@ public:
     // they return true if they completed, false if interrupted
     bool blackout();
     bool whiteout();
+    bool flash();
     bool TBGB();
+
+
+    // these guys are just for testing
     bool linetest();
     bool rainbow();
     bool colorwheel();
