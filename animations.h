@@ -33,6 +33,7 @@ public:
     bool blackout();
     bool whiteout();
     bool flash();
+    bool foo_to_full(double start);
     bool TBGB();
 
 
@@ -55,6 +56,9 @@ private:
     // apply the master times the color
     Framebuf::Color get_global_color();
 
+    // "dim" the color specified by multiplying by mult (between 0 and 1)
+    static void dim(Framebuf::Color& color, double mult);
+    
     // is an animation canceling?
     std::atomic<bool> m_canceling;
 

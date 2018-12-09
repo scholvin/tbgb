@@ -5,6 +5,8 @@
 
 namespace {
     const int FLASH_DELAY = 250;
+    const int FOO_TO_FULL_STEPS = 100;
+    const int FOO_TO_FULL_DELAY = 10;
 }
 
 Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_fb(fb), m_r1(r1), m_r2(r2),
@@ -18,6 +20,9 @@ Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_f
     m_list.push_back(std::make_tuple("blackout", std::bind(&Animations::blackout, this), nullptr));
     m_list.push_back(std::make_tuple("whiteout", std::bind(&Animations::whiteout, this), &Framebuf::INCANDESCENT));
     m_list.push_back(std::make_tuple("flash", std::bind(&Animations::flash, this), &Framebuf::INCANDESCENT));
+    m_list.push_back(std::make_tuple("0 to 100", std::bind(&Animations::foo_to_full, this, 0.0), &Framebuf::INCANDESCENT));
+    m_list.push_back(std::make_tuple("50 to 100", std::bind(&Animations::foo_to_full, this, 0.5), &Framebuf::INCANDESCENT));
+
 
 #if 0    
     m_list.push_back(std::make_pair("TBGB", std::bind(&Animations::TBGB, this)));
@@ -64,9 +69,7 @@ Animations::get_global_color()
         std::lock_guard<std::mutex> lock(m_masterMutex);
         mult = m_master;
     }
-    ret.set_red(mult * ret.get_red());
-    ret.set_green(mult * ret.get_green());
-    ret.set_blue(mult * ret.get_blue());
+    dim(ret, mult);
     return ret;
 }
 
@@ -142,6 +145,29 @@ Animations::flash(void)
     SLEEPMS(FLASH_DELAY);
     if (!blackout()) return false;
     SLEEPMS(FLASH_DELAY);
+    return true;
+}
+
+bool
+Animations::foo_to_full(double start)
+{
+    for (double d = start; d <= 1.0; d += (1.0 - start) / FOO_TO_FULL_STEPS)
+    {
+        Framebuf::Color color = get_global_color();
+        dim(color, d);
+        {
+            LOCK;
+            for (int x = 0; x < TBGB_XMAX; x++)
+            {
+                for (int y = 0; y < TBGB_YMAX; y++)
+                {
+                    m_fb.data(x, y) = color;
+                }
+            }
+        }
+        RENDER;
+        SLEEPMS(FOO_TO_FULL_DELAY);
+    }
     return true;
 }
 
@@ -311,3 +337,14 @@ Animations::one_letter_test(int start)
     }
     return true;
 }
+
+void
+Animations::dim(Framebuf::Color& color, double mult)
+{
+    if (mult < 0 || mult > 1)
+        return;
+    color.set_red(mult * color.get_red());
+    color.set_green(mult * color.get_green());
+    color.set_blue(mult * color.get_blue());
+}
+
