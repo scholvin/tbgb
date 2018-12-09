@@ -34,7 +34,7 @@ public:
     bool blackout();
     bool whiteout();
     bool flash();
-    bool foo_to_full(double start);
+    bool foo_to_full(double start, bool oscillate);
     bool top_down_wave();
     bool left_right_wave();
     bool TBGB(bool cumulative);

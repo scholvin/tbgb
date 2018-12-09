@@ -74,8 +74,8 @@ Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_f
     m_list.push_back(std::make_tuple("blackout", std::bind(&Animations::blackout, this), nullptr));
     m_list.push_back(std::make_tuple("whiteout", std::bind(&Animations::whiteout, this), &Framebuf::INCANDESCENT));
     m_list.push_back(std::make_tuple("flash", std::bind(&Animations::flash, this), &Framebuf::INCANDESCENT));
-    m_list.push_back(std::make_tuple("0 to 100", std::bind(&Animations::foo_to_full, this, 0.0), &Framebuf::INCANDESCENT));
-    m_list.push_back(std::make_tuple("50 to 100", std::bind(&Animations::foo_to_full, this, 0.5), &Framebuf::INCANDESCENT));
+    m_list.push_back(std::make_tuple("0 to 100", std::bind(&Animations::foo_to_full, this, 0.0, false), &Framebuf::INCANDESCENT));
+    m_list.push_back(std::make_tuple("50 to 100", std::bind(&Animations::foo_to_full, this, 0.5, false), &Framebuf::INCANDESCENT));
     m_list.push_back(std::make_tuple("top down", std::bind(&Animations::top_down_wave, this), &Framebuf::INCANDESCENT));
     m_list.push_back(std::make_tuple("left right", std::bind(&Animations::left_right_wave, this), &Framebuf::INCANDESCENT));
     m_list.push_back(std::make_tuple("TBGB all", std::bind(&Animations::TBGB, this, true), &Framebuf::INCANDESCENT));
@@ -88,6 +88,8 @@ Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_f
 
     m_list.push_back(std::make_tuple("twinkle color", std::bind(&Animations::twinkle, this, true), nullptr));
     m_list.push_back(std::make_tuple("rainbow", std::bind(&Animations::rainbow, this), nullptr));
+    m_list.push_back(std::make_tuple("oscillate blue", std::bind(&Animations::foo_to_full, this, 0.0, true), &Framebuf::BLUE));
+    m_list.push_back(std::make_tuple("oscillate red", std::bind(&Animations::foo_to_full, this, 0.0, true), &Framebuf::RED));
 #if 0
     // this may or may not ever go away
     m_list.push_back(std::make_pair("colorwheel", std::bind(&Animations::colorwheel, this)));
@@ -246,9 +248,29 @@ Animations::flash(void)
 }
 
 bool
-Animations::foo_to_full(double start)
+Animations::foo_to_full(double start, bool oscillate)
 {
     for (double d = start; d <= 1.0; d += (1.0 - start) / FOO_TO_FULL_STEPS)
+    {
+        Framebuf::Color color = get_global_color();
+        dim(color, d);
+        {
+            LOCK;
+            for (int x = 0; x < TBGB_XMAX; x++)
+            {
+                for (int y = 0; y < TBGB_YMAX; y++)
+                {
+                    m_fb.data(x, y) = color;
+                }
+            }
+        }
+        RENDER;
+        SLEEPMS(FOO_TO_FULL_DELAY);
+    }
+    if (!oscillate)
+        return true;
+    // otherwise go back down
+    for (double d = 1.0; d >= start; d -= (1.0 - start) / FOO_TO_FULL_STEPS)
     {
         Framebuf::Color color = get_global_color();
         dim(color, d);
@@ -566,9 +588,6 @@ Animations::rainbow(void)
     }
     return true;
 }
-
-
-
 
 #if 0
 bool
