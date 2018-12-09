@@ -37,30 +37,19 @@ public:
     bool top_down_wave();
     bool left_right_wave();
     bool TBGB(bool cumulative);
+    bool edge_chase();
 
-
-    // these guys are just for testing
-    bool linetest();
     bool rainbow();
-    bool colorwheel();
-    bool demo();
+
+
+    // for points...
+    struct _pt { int x, y; };
 
 private:
     Framebuf& m_fb;
     AnimationList m_list;
     RenderFuncType m_r1, m_r2;
-
-    bool one_letter_test(int start);
-
-    // return true if it's OK to keep going, false if time to stop
-    bool render();
-
-    // apply the master times the color
-    Framebuf::Color get_global_color();
-
-    // "dim" the color specified by multiplying by mult (between 0 and 1)
-    static void dim(Framebuf::Color& color, double mult);
-    
+  
     // is an animation canceling?
     std::atomic<bool> m_canceling;
 
@@ -70,7 +59,31 @@ private:
     std::mutex m_masterMutex;
     double m_master;
 
+
+
     // animation specific stuff
     int m_rainbow_lastc;
+
+    // edge train
+    std::deque<_pt> m_et;
+    std::vector<_pt> m_letter_perimeters;
+
+    // return true if it's OK to keep going, false if time to stop
+    bool render();
+
+    // apply the master times the color
+    Framebuf::Color get_global_color();
+
+    // "dim" the color specified by multiplying by mult (between 0 and 1)
+    static void dim(Framebuf::Color& color, double mult);
+
+#if 0
+    // these guys are just for testing
+    bool one_letter_test(int start);
+    bool linetest();
+    bool colorwheel();
+    bool demo();
+#endif    
+  
 };
 
