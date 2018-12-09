@@ -38,6 +38,7 @@ public:
     bool left_right_wave();
     bool TBGB(bool cumulative);
     bool edge_chase();
+    bool one_by_one();
 
     bool rainbow();
 

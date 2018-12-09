@@ -172,7 +172,7 @@ Viz::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
         {
             for (int y = 0; y < TBGB_YMAX; y++)
             {
-                if (!isVisible(x, y)) // this looks backwards but it's right
+                if (!::is_visible(x, y)) // oops, I picked a name that was already in use by gtk
                 {
                     continue;
                 }

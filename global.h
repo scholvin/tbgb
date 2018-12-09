@@ -9,4 +9,4 @@ static const int B4_START = G3_START + LETTER_WIDTH + 1;
 static const int TBGB_XMAX = B4_START + LETTER_WIDTH;;
 static const int TBGB_YMAX = 17;
 
-bool isVisible(int x, int y);
+bool is_visible(int x, int y);

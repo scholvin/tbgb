@@ -24,7 +24,7 @@ const std::array<std::array<char, TBGB_XMAX+1>, TBGB_YMAX> visible = {
 };
 }
 
-bool isVisible(int x, int y)
+bool is_visible(int x, int y)
 {
     if (x < 0 || x >= TBGB_XMAX || y < 0 || y >= TBGB_YMAX)
         return false;

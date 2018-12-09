@@ -13,6 +13,7 @@ namespace {
     const int TBGB_DELAY = 250;
     const int EDGE_CHASE_DELAY = 4;
     const int EDGE_TRAIN_LENGTH = 3;
+    const int ONE_BY_ONE_DELAY = 3;
 
     const std::vector<Animations::_pt> T1_PERIMETER = {
         {0, 0}, {1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0},
@@ -72,6 +73,7 @@ Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_f
     m_list.push_back(std::make_tuple("TBGB all", std::bind(&Animations::TBGB, this, true), &Framebuf::INCANDESCENT));
     m_list.push_back(std::make_tuple("TBGB each", std::bind(&Animations::TBGB, this, false), &Framebuf::INCANDESCENT));
     m_list.push_back(std::make_tuple("edge chase", std::bind(&Animations::edge_chase, this), &Framebuf::INCANDESCENT));
+    m_list.push_back(std::make_tuple("one by one", std::bind(&Animations::one_by_one, this), &Framebuf::INCANDESCENT));
 
 #if 0
     m_list.push_back(std::make_pair("rainbow", std::bind(&Animations::rainbow, this)));
@@ -89,6 +91,7 @@ Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_f
 
     m_list.push_back(std::make_pair("demo", std::bind(&Animations::demo, this)));
 #endif
+    // probably some cute way to do this in the static namespace above but no time
     m_letter_perimeters = T1_PERIMETER;
     m_letter_perimeters.insert(m_letter_perimeters.end(), B2_PERIMETER.begin(), B2_PERIMETER.end());
     m_letter_perimeters.insert(m_letter_perimeters.end(), G3_PERIMETER.begin(), G3_PERIMETER.end());
@@ -346,6 +349,32 @@ Animations::edge_chase()
 }
 
 bool
+Animations::one_by_one(void)
+{
+    int x0 = -1;
+    int y0 = -1;
+    if (!blackout()) return false;
+    for (int y = 0; y < TBGB_YMAX; y++)
+    {
+        for (int x = 0; x < TBGB_XMAX; x++)
+        {
+             if (!is_visible(x, y))
+                continue;
+            {
+                LOCK;
+                m_fb.data(x0, y0) = Framebuf::BLACK;
+                m_fb.data(x, y) = get_global_color();
+                x0 = x;
+                y0 = y;
+            }
+            RENDER;
+            SLEEPMS(ONE_BY_ONE_DELAY);
+        }
+    }
+    return true;
+}
+
+bool
 Animations::rainbow(void)
 {
     Framebuf::Color colors[] = { Framebuf::RED, Framebuf::ORANGE, Framebuf::YELLOW, Framebuf::GREEN,
@@ -463,7 +492,7 @@ Animations::one_letter_test(int start)
     {
         for (int x = start; x < start+LETTER_WIDTH; x++)
         {
-            if (!isVisible(x, y))
+            if (!is_visible(x, y))
                 continue;
             {
                 LOCK;
