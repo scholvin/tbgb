@@ -42,7 +42,7 @@ Framebuf::line(int x0, int y0, int x1, int y1, Color color)
     if (x0 == x1)
     {
         // special case for vertical
-        for (int y = y0; y <= y1; ++y)
+        for (int y = std::min(y0, y1); y <= std::max(y0, y1); ++y)
             if (x0 >= 0 && x0 < TBGB_XMAX && y >= 0 && y < TBGB_YMAX)
                 m_buf[x0][y] = color;
         return;
@@ -50,7 +50,7 @@ Framebuf::line(int x0, int y0, int x1, int y1, Color color)
     if (y0 == y1)
     {
         // special case for horizontal
-        for (int x = x0; x <= x1; ++x)
+        for (int x = std::min(x0, x1); x <= std::max(x0, x1); ++x)
             if (x >= 0 && x < TBGB_XMAX && y0 >= 0 && y0 < TBGB_YMAX)
                 m_buf[x][y0] = color;
         return;

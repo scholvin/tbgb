@@ -14,6 +14,7 @@ namespace {
     const int EDGE_CHASE_DELAY = 4;
     const int EDGE_TRAIN_LENGTH = 3;
     const int ONE_BY_ONE_DELAY = 3;
+    const int INSIDE_OUT_DELAY = 150;
 
     const std::vector<Animations::_pt> T1_PERIMETER = {
         {0, 0}, {1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0},
@@ -74,6 +75,8 @@ Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_f
     m_list.push_back(std::make_tuple("TBGB each", std::bind(&Animations::TBGB, this, false), &Framebuf::INCANDESCENT));
     m_list.push_back(std::make_tuple("edge chase", std::bind(&Animations::edge_chase, this), &Framebuf::INCANDESCENT));
     m_list.push_back(std::make_tuple("one by one", std::bind(&Animations::one_by_one, this), &Framebuf::INCANDESCENT));
+    m_list.push_back(std::make_tuple("inside out", std::bind(&Animations::inside_out, this), &Framebuf::INCANDESCENT));
+    m_list.push_back(std::make_tuple("outside in", std::bind(&Animations::outside_in, this), &Framebuf::INCANDESCENT));
 
 #if 0
     m_list.push_back(std::make_pair("rainbow", std::bind(&Animations::rainbow, this)));
@@ -371,6 +374,88 @@ Animations::one_by_one(void)
             SLEEPMS(ONE_BY_ONE_DELAY);
         }
     }
+    return true;
+}
+
+bool
+Animations::inside_out(void)
+{
+    int x = 8;
+    int y = 8;
+    int w = 22;
+    int h = 0;
+
+    if (!blackout()) return false;
+
+    bool done = false;
+    while (!done)
+    {
+        {
+            LOCK;
+            if (h == 0)
+            {
+                m_fb.line(x, y, x + w, y, get_global_color());
+            }
+            else
+            {
+                m_fb.line(x, y, x + w, y, get_global_color());
+                m_fb.line(x + w, y, x + w, y + h, get_global_color());
+                m_fb.line(x + w, y + h, x, y + h, get_global_color());
+                m_fb.line(x, y + h, x, y, get_global_color());
+            }
+        }
+        RENDER;
+        SLEEPMS(INSIDE_OUT_DELAY);
+        x--;
+        y--;
+        w += 2;
+        h += 2;
+        if (x + w >= TBGB_XMAX)
+            done = true;
+    }
+    if (!blackout()) return false;
+    SLEEPMS(INSIDE_OUT_DELAY);
+    return true;
+}
+
+bool
+Animations::outside_in()
+{
+    int x = 0;
+    int y = 0;
+    int w = TBGB_XMAX - 1;
+    int h = TBGB_YMAX - 1;
+
+    if (!blackout()) return false;
+
+    bool done = false;
+    while (!done)
+    {
+        {
+            LOCK;
+            if (h <= 0)
+            {
+                m_fb.line(x, y, x + w, y, get_global_color());
+                done = true;
+                std::cout << "x, y, w, h " << x << " " << y << " " << w << " " << h << std::endl;
+            }
+            else
+            {
+                m_fb.line(x, y, x + w, y, get_global_color());
+                m_fb.line(x + w, y, x + w, y + h, get_global_color());
+                m_fb.line(x + w, y + h, x, y + h, get_global_color());
+                m_fb.line(x, y + h, x, y, get_global_color());
+            }
+        }
+        RENDER;
+        SLEEPMS(INSIDE_OUT_DELAY);
+        x++;
+        y++;
+        w -= 2;
+        h -= 2;
+    }
+    if (!blackout()) return false;
+    SLEEPMS(INSIDE_OUT_DELAY);
     return true;
 }
 

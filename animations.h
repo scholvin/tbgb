@@ -39,6 +39,8 @@ public:
     bool TBGB(bool cumulative);
     bool edge_chase();
     bool one_by_one();
+    bool inside_out();
+    bool outside_in();
 
     bool rainbow();
 
