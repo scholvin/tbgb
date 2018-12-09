@@ -24,7 +24,7 @@ private:
 public:
     ControlWidget(Animations& anim) : m_anim(anim)
     {
-        m_red.set_range(0, 1);
+        m_red.set_range(0, 1); // TODO 0,255
         m_red.set_inverted(true);
         m_red.set_increments(0.001, 0.1);
         m_red.property_digits() = 3;
