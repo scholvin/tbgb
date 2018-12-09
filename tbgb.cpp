@@ -24,24 +24,24 @@ private:
 public:
     ControlWidget(Animations& anim) : m_anim(anim)
     {
-        m_red.set_range(0, 1); // TODO 0,255
+        m_red.set_range(0, 255);
         m_red.set_inverted(true);
-        m_red.set_increments(0.001, 0.1);
-        m_red.property_digits() = 3;
+        m_red.set_increments(1, 16);
+        m_red.property_digits() = 0;
         m_red.override_color(Gdk::RGBA("red"));
         m_red.signal_value_changed().connect(sigc::mem_fun(*this, &ControlWidget::on_color_change));
 
-        m_green.set_range(0, 1);
+        m_green.set_range(0, 255);
         m_green.set_inverted(true);
-        m_green.set_increments(0.001, 0.1);
-        m_green.property_digits() = 3;
+        m_green.set_increments(1, 16);
+        m_green.property_digits() = 0;
         m_green.override_color(Gdk::RGBA("green"));
         m_green.signal_value_changed().connect(sigc::mem_fun(*this, &ControlWidget::on_color_change));
 
-        m_blue.set_range(0, 1);
+        m_blue.set_range(0, 255);
         m_blue.set_inverted(true);
-        m_blue.set_increments(0.001, 0.1);
-        m_blue.property_digits() = 3;
+        m_blue.set_increments(1, 16);
+        m_blue.property_digits() = 0;
         m_blue.override_color(Gdk::RGBA("blue"));
         m_blue.signal_value_changed().connect(sigc::mem_fun(*this, &ControlWidget::on_color_change));
 
@@ -63,17 +63,17 @@ public:
 
     void set_color(const Framebuf::Color& color)
     {
-        m_red.set_value(color.get_red());
-        m_green.set_value(color.get_green());
-        m_blue.set_value(color.get_blue());
+        m_red.set_value(color.get_red() * 255);
+        m_green.set_value(color.get_green() * 255);
+        m_blue.set_value(color.get_blue() * 255);
     }
 
     Framebuf::Color get_color() const
     {
         Framebuf::Color ret;
-        ret.set_red(m_red.get_value());
-        ret.set_green(m_green.get_value());
-        ret.set_blue(m_blue.get_value());
+        ret.set_red(m_red.get_value() / 255.0);
+        ret.set_green(m_green.get_value() / 255.0);
+        ret.set_blue(m_blue.get_value() / 255.0);
         return ret;
     }
 
@@ -95,7 +95,7 @@ private:
     void on_color_change()
     {
         //std::cout << "red=" << m_red.get_value() << " green=" << m_green.get_value() << " blue=" << m_blue.get_value() << std::endl;
-        m_anim.set_global_colors(m_red.get_value(), m_green.get_value(), m_blue.get_value());
+        m_anim.set_global_colors(m_red.get_value() / 255.0, m_green.get_value() / 255.0, m_blue.get_value() / 255.0);
     }
 
     void on_master_change()
