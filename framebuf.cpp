@@ -13,6 +13,12 @@ const Framebuf::Color Framebuf::GREEN(Gdk::RGBA("green"));
 const Framebuf::Color Framebuf::BLUE(Gdk::RGBA("blue"));
 const Framebuf::Color Framebuf::PURPLE(Gdk::RGBA("purple"));
 
+const Framebuf::Color Framebuf::RAINBOW[] = { 
+        Framebuf::RED, Framebuf::ORANGE, Framebuf::YELLOW, Framebuf::GREEN,
+        Framebuf::BLUE, Framebuf::PURPLE, Framebuf::BLACK 
+    };
+const int Framebuf::RAINBOW_LENGTH(7);
+
 Framebuf::Color Framebuf::s_junk(Gdk::RGBA("black"));
 
 Framebuf::Framebuf()

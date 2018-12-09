@@ -22,6 +22,9 @@ public:
     static const Color BLUE;
     static const Color PURPLE;
 
+    static const Color RAINBOW[];
+    static const int RAINBOW_LENGTH;
+
 private:
     std::array<std::array<Color, TBGB_YMAX>, TBGB_XMAX> m_buf;
     std::mutex m_mutex;

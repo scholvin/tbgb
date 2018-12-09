@@ -15,7 +15,7 @@ namespace {
     const int EDGE_TRAIN_LENGTH = 3;
     const int ONE_BY_ONE_DELAY = 3;
     const int INSIDE_OUT_DELAY = 150;
-    const int TWINKLE_STARS = 45;
+    const int TWINKLE_STARS = 100;
     const int TWINKLE_MIN_DELAY = 10;
     const int TWINKLE_MAX_DELAY = 150;
 
@@ -57,6 +57,7 @@ namespace {
         {30, 6}, {30, 5}, {30, 4}, {30, 3}, {30, 2}, {30, 1}
     };
 
+   
 }
 
 Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_fb(fb), m_r1(r1), m_r2(r2),
@@ -66,8 +67,8 @@ Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_f
     m_gen(m_rd()),
     m_xdist(0, TBGB_XMAX),
     m_ydist(0, TBGB_YMAX),
-    m_rainbow_lastc(0)
-
+    m_rainbow_lastc(0),
+    m_last_twinkle_color(false)
 {
     // don't love this pattern, but we gotta move along
     m_list.push_back(std::make_tuple("blackout", std::bind(&Animations::blackout, this), nullptr));
@@ -83,11 +84,11 @@ Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_f
     m_list.push_back(std::make_tuple("one by one", std::bind(&Animations::one_by_one, this), &Framebuf::INCANDESCENT));
     m_list.push_back(std::make_tuple("inside out", std::bind(&Animations::inside_out, this), &Framebuf::INCANDESCENT));
     m_list.push_back(std::make_tuple("outside in", std::bind(&Animations::outside_in, this), &Framebuf::INCANDESCENT));
-    m_list.push_back(std::make_tuple("twinkle", std::bind(&Animations::twinkle, this), &Framebuf::INCANDESCENT));
+    m_list.push_back(std::make_tuple("twinkle mono", std::bind(&Animations::twinkle, this, false), &Framebuf::INCANDESCENT));
 
+    m_list.push_back(std::make_tuple("twinkle color", std::bind(&Animations::twinkle, this, true), nullptr));
+    m_list.push_back(std::make_tuple("rainbow", std::bind(&Animations::rainbow, this), nullptr));
 #if 0
-    m_list.push_back(std::make_pair("rainbow", std::bind(&Animations::rainbow, this)));
-
     // this may or may not ever go away
     m_list.push_back(std::make_pair("colorwheel", std::bind(&Animations::colorwheel, this)));
 
@@ -486,24 +487,60 @@ Animations::outside_in()
 }
 
 bool
-Animations::twinkle()
+Animations::twinkle(bool color)
 {
+    if (m_last_twinkle_color != color)
+    {
+        m_stars.clear();
+        m_star_colors.clear();
+        m_last_twinkle_color = color;
+    }
+
     if (!blackout()) return false;
 
-    _pt pt = random_pt();
-    m_stars.push_front(pt);
+    // generate a new point and color, put on deques
+    auto add_star = [this, &color]() {      
+        _pt pt = random_pt();
+        m_stars.push_front(pt);
+        if (color)
+        {
+            int cidx = random_num(0, Framebuf::RAINBOW_LENGTH - 1);
+            m_star_colors.push_front(Framebuf::RAINBOW[cidx]);
+        }
+        else
+        {
+            m_star_colors.push_front(get_global_color());   
+        }
+    };
+
+    // first time - populate
+    if (m_stars.size() == 0)
+    {
+        while (m_stars.size() < TWINKLE_STARS)
+        {
+            add_star();            
+        }
+    }
+    else
+    {
+        add_star();
+    }
+
     if (m_stars.size() > TWINKLE_STARS)
     {
         {
             LOCK;
             m_fb.data(m_stars.back().x, m_stars.back().y) = Framebuf::BLACK;
             m_stars.pop_back();
+            m_star_colors.pop_back();
         }
     }
+
+    auto c = m_star_colors.begin();
     for (auto star: m_stars)
     {
         LOCK;
-        m_fb.data(star.x, star.y) = get_global_color();
+        m_fb.data(star.x, star.y) = *c++;
     }
     RENDER;
     SLEEPMS(random_num(TWINKLE_MIN_DELAY, TWINKLE_MAX_DELAY));
@@ -513,8 +550,6 @@ Animations::twinkle()
 bool
 Animations::rainbow(void)
 {
-    Framebuf::Color colors[] = { Framebuf::RED, Framebuf::ORANGE, Framebuf::YELLOW, Framebuf::GREEN,
-                                 Framebuf::BLUE, Framebuf::PURPLE, Framebuf::BLACK };
     int CMAX = 6;
     m_rainbow_lastc = (m_rainbow_lastc + 1 ) % CMAX;
     int c = m_rainbow_lastc;
@@ -523,7 +558,7 @@ Animations::rainbow(void)
     {
         {
             LOCK;
-            m_fb.line(x, 0, 0, x, colors[c]);
+            m_fb.line(x, 0, 0, x, Framebuf::RAINBOW[c]);
         }
         RENDER;
         SLEEPMS(20);

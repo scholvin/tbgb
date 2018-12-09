@@ -42,7 +42,7 @@ public:
     bool one_by_one();
     bool inside_out();
     bool outside_in();
-    bool twinkle();
+    bool twinkle(bool color);
 
     bool rainbow();
 
@@ -78,6 +78,8 @@ private:
 
     // twinkle twinkle
     std::deque<_pt> m_stars;
+    std::deque<Framebuf::Color> m_star_colors;
+    bool m_last_twinkle_color;
 
     // return true if it's OK to keep going, false if time to stop
     bool render();
