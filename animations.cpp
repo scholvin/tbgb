@@ -4,10 +4,12 @@
 #include <thread>
 
 namespace {
+    // delays are all in milliseconds
     const int FLASH_DELAY = 250;
     const int FOO_TO_FULL_STEPS = 100;
     const int FOO_TO_FULL_DELAY = 10;
     const int TOP_DOWN_WAVE_DELAY = 50;
+    const int LEFT_RIGHT_WAVE_DELAY = 35;
 }
 
 Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_fb(fb), m_r1(r1), m_r2(r2),
@@ -24,6 +26,7 @@ Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_f
     m_list.push_back(std::make_tuple("0 to 100", std::bind(&Animations::foo_to_full, this, 0.0), &Framebuf::INCANDESCENT));
     m_list.push_back(std::make_tuple("50 to 100", std::bind(&Animations::foo_to_full, this, 0.5), &Framebuf::INCANDESCENT));
     m_list.push_back(std::make_tuple("top down", std::bind(&Animations::top_down_wave, this), &Framebuf::INCANDESCENT));
+    m_list.push_back(std::make_tuple("left right", std::bind(&Animations::left_right_wave, this), &Framebuf::INCANDESCENT));
 
 
 #if 0    
@@ -192,6 +195,27 @@ Animations::top_down_wave(void)
     }
     return true;
 }
+
+bool
+Animations::left_right_wave(void)
+{
+    if (!blackout()) return false;
+    SLEEPMS(LEFT_RIGHT_WAVE_DELAY);
+    for (int x = 0; x < TBGB_XMAX; x++)
+    {
+        {
+            LOCK;
+            for (int y = 0; y < TBGB_YMAX; y++)
+            {
+                m_fb.data(x, y) = get_global_color();
+            }
+        }
+        RENDER;
+        SLEEPMS(LEFT_RIGHT_WAVE_DELAY);
+    }
+    return true;
+}
+
 
 bool
 Animations::TBGB(void)

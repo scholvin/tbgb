@@ -35,6 +35,7 @@ public:
     bool flash();
     bool foo_to_full(double start);
     bool top_down_wave();
+    bool left_right_wave();
     bool TBGB();
 
 
