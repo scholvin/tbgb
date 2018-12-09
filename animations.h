@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <utility>
+#include <random>
 #include "framebuf.h"
 
 // home to the animation code
@@ -41,6 +42,7 @@ public:
     bool one_by_one();
     bool inside_out();
     bool outside_in();
+    bool twinkle();
 
     bool rainbow();
 
@@ -62,7 +64,10 @@ private:
     std::mutex m_masterMutex;
     double m_master;
 
-
+    std::random_device m_rd;
+    std::mt19937 m_gen;
+    std::uniform_int_distribution<> m_xdist;
+    std::uniform_int_distribution<> m_ydist;
 
     // animation specific stuff
     int m_rainbow_lastc;
@@ -70,6 +75,9 @@ private:
     // edge train
     std::deque<_pt> m_et;
     std::vector<_pt> m_letter_perimeters;
+
+    // twinkle twinkle
+    std::deque<_pt> m_stars;
 
     // return true if it's OK to keep going, false if time to stop
     bool render();
@@ -79,6 +87,13 @@ private:
 
     // "dim" the color specified by multiplying by mult (between 0 and 1)
     static void dim(Framebuf::Color& color, double mult);
+
+    // return a random, visible point
+    _pt random_pt();
+
+    // inclusive
+    int random_num(int min, int max);
+
 
 #if 0
     // these guys are just for testing

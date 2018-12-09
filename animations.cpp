@@ -15,6 +15,9 @@ namespace {
     const int EDGE_TRAIN_LENGTH = 3;
     const int ONE_BY_ONE_DELAY = 3;
     const int INSIDE_OUT_DELAY = 150;
+    const int TWINKLE_STARS = 45;
+    const int TWINKLE_MIN_DELAY = 10;
+    const int TWINKLE_MAX_DELAY = 150;
 
     const std::vector<Animations::_pt> T1_PERIMETER = {
         {0, 0}, {1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0},
@@ -60,6 +63,9 @@ Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_f
     m_canceling(false),
     m_color(Framebuf::BLACK),
     m_master(1),
+    m_gen(m_rd()),
+    m_xdist(0, TBGB_XMAX),
+    m_ydist(0, TBGB_YMAX),
     m_rainbow_lastc(0)
 
 {
@@ -77,6 +83,7 @@ Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_f
     m_list.push_back(std::make_tuple("one by one", std::bind(&Animations::one_by_one, this), &Framebuf::INCANDESCENT));
     m_list.push_back(std::make_tuple("inside out", std::bind(&Animations::inside_out, this), &Framebuf::INCANDESCENT));
     m_list.push_back(std::make_tuple("outside in", std::bind(&Animations::outside_in, this), &Framebuf::INCANDESCENT));
+    m_list.push_back(std::make_tuple("twinkle", std::bind(&Animations::twinkle, this), &Framebuf::INCANDESCENT));
 
 #if 0
     m_list.push_back(std::make_pair("rainbow", std::bind(&Animations::rainbow, this)));
@@ -165,6 +172,25 @@ Animations::dim(Framebuf::Color& color, double mult)
     color.set_red(mult * color.get_red());
     color.set_green(mult * color.get_green());
     color.set_blue(mult * color.get_blue());
+}
+
+Animations::_pt
+Animations::random_pt()
+{
+    _pt ret;
+    do
+    {
+        ret.x = m_xdist(m_gen);
+        ret.y = m_ydist(m_gen);
+    } while (!::is_visible(ret.x, ret.y));
+    return ret;
+}
+
+int
+Animations::random_num(int min, int max)
+{
+    std::uniform_int_distribution<> dist(min, max+1);
+    return dist(m_gen);
 }
 
 // ------------------------------ animations from this point on  ----------------------------
@@ -330,7 +356,7 @@ bool
 Animations::edge_chase()
 {
     if (!blackout()) return false;
-    m_et.clear();
+    //m_et.clear();
     for (auto it: m_letter_perimeters)
     {
         m_et.push_front(it);
@@ -456,6 +482,31 @@ Animations::outside_in()
     }
     if (!blackout()) return false;
     SLEEPMS(INSIDE_OUT_DELAY);
+    return true;
+}
+
+bool
+Animations::twinkle()
+{
+    if (!blackout()) return false;
+
+    _pt pt = random_pt();
+    m_stars.push_front(pt);
+    if (m_stars.size() > TWINKLE_STARS)
+    {
+        {
+            LOCK;
+            m_fb.data(m_stars.back().x, m_stars.back().y) = Framebuf::BLACK;
+            m_stars.pop_back();
+        }
+    }
+    for (auto star: m_stars)
+    {
+        LOCK;
+        m_fb.data(star.x, star.y) = get_global_color();
+    }
+    RENDER;
+    SLEEPMS(random_num(TWINKLE_MIN_DELAY, TWINKLE_MAX_DELAY));
     return true;
 }
 
