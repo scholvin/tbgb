@@ -10,6 +10,7 @@ namespace {
     const int FOO_TO_FULL_DELAY = 10;
     const int TOP_DOWN_WAVE_DELAY = 50;
     const int LEFT_RIGHT_WAVE_DELAY = 35;
+    const int TBGB_DELAY = 250;
 }
 
 Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_fb(fb), m_r1(r1), m_r2(r2),
@@ -27,10 +28,11 @@ Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_f
     m_list.push_back(std::make_tuple("50 to 100", std::bind(&Animations::foo_to_full, this, 0.5), &Framebuf::INCANDESCENT));
     m_list.push_back(std::make_tuple("top down", std::bind(&Animations::top_down_wave, this), &Framebuf::INCANDESCENT));
     m_list.push_back(std::make_tuple("left right", std::bind(&Animations::left_right_wave, this), &Framebuf::INCANDESCENT));
+    m_list.push_back(std::make_tuple("TBGB all", std::bind(&Animations::TBGB, this, true), &Framebuf::INCANDESCENT));
+    m_list.push_back(std::make_tuple("TBGB each", std::bind(&Animations::TBGB, this, false), &Framebuf::INCANDESCENT));
 
 
-#if 0    
-    m_list.push_back(std::make_pair("TBGB", std::bind(&Animations::TBGB, this)));
+#if 0
     m_list.push_back(std::make_pair("rainbow", std::bind(&Animations::rainbow, this)));
 
     // this may or may not ever go away
@@ -216,31 +218,38 @@ Animations::left_right_wave(void)
     return true;
 }
 
-
 bool
-Animations::TBGB(void)
+Animations::TBGB(bool cumulative)
 {
-    blackout();
-
-    const int DELAY = 250;
-
+    if (!blackout()) return false;
     const int lmax[] = { T1_START+LETTER_WIDTH, B2_START+LETTER_WIDTH, G3_START+LETTER_WIDTH, B4_START+LETTER_WIDTH };
     int x = 0;
     for (int l = 0; l < 4; l++)
     {
         {
+            if (!cumulative)
+            {
+                if (!blackout()) return false;
+            }
             LOCK;
             for (; x < lmax[l]; x++)
             {
                 for (int y = 0; y < TBGB_YMAX; y++)
                 {
-                    m_fb.data(x, y) = Framebuf::WHITE;
+                    m_fb.data(x, y) = get_global_color();
                 }
             }
         }
         RENDER;
-        SLEEPMS(DELAY);
+        SLEEPMS(TBGB_DELAY);
     }
+    if (cumulative)
+    {
+        if (!blackout()) return false;
+        SLEEPMS(TBGB_DELAY);
+    }
+#if 0
+    // this code is a shout-out to the old G-O-O-D lights
     for (int i = 0; i < 4; i++)
     {
         if (!blackout()) return false;
@@ -250,6 +259,7 @@ Animations::TBGB(void)
     }
     if (!blackout()) return false;
     SLEEPMS(DELAY);
+#endif
     return true;
 }
         

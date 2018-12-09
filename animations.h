@@ -36,7 +36,7 @@ public:
     bool foo_to_full(double start);
     bool top_down_wave();
     bool left_right_wave();
-    bool TBGB();
+    bool TBGB(bool cumulative);
 
 
     // these guys are just for testing
