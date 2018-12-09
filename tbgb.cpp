@@ -162,6 +162,7 @@ public:
         }
         m_current = animation;
         m_animations.cancel();
+        m_viz.set_animation_name(name);
     }
 
     void animation_runner(void)

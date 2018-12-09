@@ -13,6 +13,8 @@ public:
     // called from outside
     void render();
 
+    void set_animation_name(const std::string& name) { m_animation_name = name; }
+
 protected:
     // Override default signal handler:
     bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr) override;
@@ -22,4 +24,5 @@ protected:
 
 private:
     Framebuf& m_fb;
+    std::string m_animation_name;
 };

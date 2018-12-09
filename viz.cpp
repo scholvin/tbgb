@@ -35,7 +35,7 @@ const std::vector<P> G = { {21, -0.5}, {28.5, -0.5}, {28.5, 2.5}, {22.5, 2.5},
 
 }
 
-Viz::Viz(Framebuf& fb) : m_fb(fb)
+Viz::Viz(Framebuf& fb) : m_fb(fb), m_animation_name("none yet")
 {
     set_size_request(1335, 650); // TODO constants
 }
@@ -188,8 +188,8 @@ Viz::on_draw(const Cairo::RefPtr<Cairo::Context>& cr)
     }
     cr->move_to(10, xformy(17));
     cr->set_source_rgb(1, 1, 1);
-    char buf[20];
-    snprintf(buf, sizeof(buf), "power: %6.2f%%", power / 3 / pixels * 100);
+    char buf[100];
+    snprintf(buf, sizeof(buf), "power: %6.2f%% animation: %s", power / 3 / pixels * 100, m_animation_name.c_str());
     //std::cout << "[" << buf << "] power=" << power << " pixels=" << pixels << " total=" << power / 3 / pixels << std::endl;
     cr->select_font_face("Courier", Cairo::FONT_SLANT_NORMAL, Cairo::FONT_WEIGHT_NORMAL);
     cr->show_text(buf);
