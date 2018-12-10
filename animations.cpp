@@ -18,6 +18,8 @@ namespace {
     const int TWINKLE_STARS = 100;
     const int TWINKLE_MIN_DELAY = 10;
     const int TWINKLE_MAX_DELAY = 150;
+    const int ROTATE3_STEPS = 50;
+    const int ROTATE3_DELAY = 10;
 
     const std::vector<Animations::_pt> T1_PERIMETER = {
         {0, 0}, {1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0},
@@ -90,6 +92,7 @@ Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_f
     m_list.push_back(std::make_tuple("rainbow", std::bind(&Animations::rainbow, this), nullptr));
     m_list.push_back(std::make_tuple("oscillate blue", std::bind(&Animations::foo_to_full, this, 0.0, true), &Framebuf::BLUE));
     m_list.push_back(std::make_tuple("oscillate red", std::bind(&Animations::foo_to_full, this, 0.0, true), &Framebuf::RED));
+    m_list.push_back(std::make_tuple("oscillate RBY", std::bind(&Animations::rotate3, this, &Framebuf::RED, &Framebuf::BLUE, &Framebuf::YELLOW), nullptr));
 #if 0
     // this may or may not ever go away
     m_list.push_back(std::make_pair("colorwheel", std::bind(&Animations::colorwheel, this)));
@@ -588,6 +591,98 @@ Animations::rainbow(void)
     }
     return true;
 }
+
+bool
+Animations::rotate3(const Framebuf::Color* one, const Framebuf::Color* two, const Framebuf::Color* three)
+{
+    if (!blackout()) return false;
+    double red, green, blue, dr, dg, db;;
+
+    dr = (two->get_red() - one->get_red()) / ROTATE3_STEPS;
+    dg = (two->get_green() - one->get_green()) / ROTATE3_STEPS;
+    db = (two->get_blue() - one->get_blue()) / ROTATE3_STEPS;
+    red = one->get_red();
+    green = one->get_green();
+    blue = one->get_blue(); 
+    for (int i = 0; i < ROTATE3_STEPS; i++)
+    {
+        Framebuf::Color color;
+        color.set_red(red);
+        color.set_green(green);
+        color.set_blue(blue);
+        {
+            LOCK;
+            for (int x = 0; x < TBGB_XMAX; x++)
+            {
+                for (int y = 0; y < TBGB_YMAX; y++)
+                {
+                    m_fb.data(x, y) = color;
+                }
+            }
+        }
+        RENDER;
+        SLEEPMS(ROTATE3_STEPS);
+        red += dr; green += dg; blue += db;
+    }
+
+    dr = (three->get_red() - two->get_red()) / ROTATE3_STEPS;
+    dg = (three->get_green() - two->get_green()) / ROTATE3_STEPS;
+    db = (three->get_blue() - two->get_blue()) / ROTATE3_STEPS;
+    red = two->get_red();
+    green = two->get_green();
+    blue = two->get_blue(); 
+    for (int i = 0; i < ROTATE3_STEPS; i++)
+    {
+        Framebuf::Color color;
+        color.set_red(red);
+        color.set_green(green);
+        color.set_blue(blue);
+        {
+            LOCK;
+            for (int x = 0; x < TBGB_XMAX; x++)
+            {
+                for (int y = 0; y < TBGB_YMAX; y++)
+                {
+                    m_fb.data(x, y) = color;
+                }
+            }
+        }
+        RENDER;
+        SLEEPMS(ROTATE3_STEPS);
+        red += dr; green += dg; blue += db;
+    }
+
+    dr = (one->get_red() - three->get_red()) / ROTATE3_STEPS;
+    dg = (one->get_green() - three->get_green()) / ROTATE3_STEPS;
+    db = (one->get_blue() - three->get_blue()) / ROTATE3_STEPS;
+    red = three->get_red();
+    green = three->get_green();
+    blue = three->get_blue(); 
+    for (int i = 0; i < ROTATE3_STEPS; i++)
+    {
+        Framebuf::Color color;
+        color.set_red(red);
+        color.set_green(green);
+        color.set_blue(blue);
+        {
+            LOCK;
+            for (int x = 0; x < TBGB_XMAX; x++)
+            {
+                for (int y = 0; y < TBGB_YMAX; y++)
+                {
+                    m_fb.data(x, y) = color;
+                }
+            }
+        }
+        RENDER;
+        SLEEPMS(ROTATE3_STEPS);
+        red += dr; green += dg; blue += db;
+    }
+
+
+    return true;
+}
+
 
 #if 0
 bool

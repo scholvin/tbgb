@@ -45,6 +45,7 @@ public:
     bool twinkle(bool color);
 
     bool rainbow();
+    bool rotate3(const Framebuf::Color* one, const Framebuf::Color* two, const Framebuf::Color* three);
 
 
     // for points...
