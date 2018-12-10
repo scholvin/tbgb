@@ -10,6 +10,9 @@
 #include "animations.h"
 #include "global.h"
 
+const int BUTTON_COUNT = 30;
+const int BUTTONS_PER_ROW = 10;
+
 class ControlWidget : public Gtk::VBox
 {
 private:
@@ -123,7 +126,7 @@ public:
         m_grid.set_hexpand(true);
 
         auto it = animations.get_all().begin();
-        for (auto i = 0; i < 20; i++)
+        for (auto i = 0; i < BUTTON_COUNT; i++)
         {
             m_buttons[i].set_hexpand(true);
             if (i < animations.get_all().size())
@@ -138,7 +141,7 @@ public:
                 m_buttons[i].set_label("animation " + std::to_string(i+1));
                 m_buttons[i].signal_clicked().connect(sigc::bind<int>(sigc::mem_fun(this, &MainWindow::not_impl), i+1));
             }
-            m_grid.attach(m_buttons[i], i % 10, i / 10, 1, 1);
+            m_grid.attach(m_buttons[i], i % BUTTONS_PER_ROW, i / BUTTONS_PER_ROW, 1, 1);
             m_buttons[i].get_child()->override_font(Pango::FontDescription("sans bold 18"));
             it++;
         }
@@ -229,7 +232,7 @@ private:
     Gtk::HBox m_topbox;     // has viz on left, controls to right
     ControlWidget m_control;
     Gtk::Grid m_grid;
-    std::array<Gtk::Button, 20> m_buttons;
+    std::array<Gtk::Button, BUTTON_COUNT> m_buttons;
 };
 
 int main(int argc, char *argv[])
