@@ -75,6 +75,7 @@ Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_f
     // don't love this pattern, but we gotta move along
     m_list.push_back(std::make_tuple("blackout", std::bind(&Animations::blackout, this), nullptr));
     m_list.push_back(std::make_tuple("whiteout", std::bind(&Animations::whiteout, this), &Framebuf::INCANDESCENT));
+    m_list.push_back(std::make_tuple("hard white", std::bind(&Animations::whiteout, this), &Framebuf::WHITE));
     m_list.push_back(std::make_tuple("flash", std::bind(&Animations::flash, this), &Framebuf::INCANDESCENT));
     m_list.push_back(std::make_tuple("0 to 100", std::bind(&Animations::foo_to_full, this, 0.0, false), &Framebuf::INCANDESCENT));
     m_list.push_back(std::make_tuple("50 to 100", std::bind(&Animations::foo_to_full, this, 0.5, false), &Framebuf::INCANDESCENT));
@@ -489,7 +490,6 @@ Animations::outside_in()
             {
                 m_fb.line(x, y, x + w, y, get_global_color());
                 done = true;
-                std::cout << "x, y, w, h " << x << " " << y << " " << w << " " << h << std::endl;
             }
             else
             {

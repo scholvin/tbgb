@@ -193,5 +193,5 @@ DMX::render(void)
     // timing
     auto end = std::chrono::system_clock::now();
     std::chrono::duration<double> diff = end - start;
-    std::cout << "elapsed DMX::render time: " << diff.count() << std::endl;
+    //std::cout << "elapsed DMX::render time: " << diff.count() << std::endl;
 }
