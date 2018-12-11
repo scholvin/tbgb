@@ -22,6 +22,9 @@ public:
     static const Color BLUE;
     static const Color PURPLE;
 
+    static const Color DIM;
+    static const Color GREG;
+
     static const Color RAINBOW[];
     static const int RAINBOW_LENGTH;
 

@@ -32,7 +32,7 @@ public:
     // the animations - I suppose these could be private since the binding is here
     // they return true if they completed, false if interrupted
     bool blackout();
-    bool whiteout();
+    bool whiteout(double percent);
     bool flash();
     bool foo_to_full(double start, bool oscillate);
     bool top_down_wave();
@@ -43,6 +43,8 @@ public:
     bool inside_out();
     bool outside_in();
     bool twinkle(bool color);
+    bool pregame();
+    bool impulse();
 
     bool rainbow();
     bool rotate3(const Framebuf::Color* one, const Framebuf::Color* two, const Framebuf::Color* three);

@@ -10,8 +10,8 @@
 #include "animations.h"
 #include "global.h"
 
-const int BUTTON_COUNT = 30;
-const int BUTTONS_PER_ROW = 10;
+const int BUTTON_COUNT = 21;
+const int BUTTONS_PER_ROW = 7;
 
 class ControlWidget : public Gtk::VBox
 {
@@ -138,8 +138,8 @@ public:
             }
             else
             {
-                m_buttons[i].set_label("animation " + std::to_string(i+1));
-                m_buttons[i].signal_clicked().connect(sigc::bind<int>(sigc::mem_fun(this, &MainWindow::not_impl), i+1));
+                m_buttons[i].set_label("<future>");
+                m_buttons[i].set_sensitive(false);
             }
             m_grid.attach(m_buttons[i], i % BUTTONS_PER_ROW, i / BUTTONS_PER_ROW, 1, 1);
             m_buttons[i].get_child()->override_font(Pango::FontDescription("sans bold 18"));
@@ -181,11 +181,6 @@ public:
         }
         m_done = true;
         std::cout << "animation_runner exit" << std::endl;
-    }
-
-    void not_impl(int i)
-    {
-        std::cout << "animation " << i << " not implemented yet" << std::endl;
     }
 
     virtual ~MainWindow() 

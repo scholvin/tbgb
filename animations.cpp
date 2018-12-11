@@ -8,6 +8,11 @@ namespace {
     const int FLASH_DELAY = 250;
     const int FOO_TO_FULL_STEPS = 100;
     const int FOO_TO_FULL_DELAY = 10;
+    const int IMPULSE_STEPS = 50;
+    const int IMPULSE_DELAY = 5;
+    const double IMPULSE_START = 1.0;
+    const double IMPULSE_MID = 0.1;
+    const double IMPULSE_END = 0.25;
     const int TOP_DOWN_WAVE_DELAY = 50;
     const int LEFT_RIGHT_WAVE_DELAY = 35;
     const int TBGB_DELAY = 250;
@@ -15,11 +20,12 @@ namespace {
     const int EDGE_TRAIN_LENGTH = 3;
     const int ONE_BY_ONE_DELAY = 3;
     const int INSIDE_OUT_DELAY = 150;
-    const int TWINKLE_STARS = 100;
+    const int TWINKLE_STARS = 125;
     const int TWINKLE_MIN_DELAY = 10;
     const int TWINKLE_MAX_DELAY = 150;
     const int ROTATE3_STEPS = 50;
     const int ROTATE3_DELAY = 10;
+    const double PREGAME_DIM = 0.03;
 
     const std::vector<Animations::_pt> T1_PERIMETER = {
         {0, 0}, {1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0},
@@ -58,8 +64,6 @@ namespace {
         {30, 14}, {30, 13}, {30, 12}, {30, 11}, {30, 10}, {30, 9}, {30, 8}, {30, 7},
         {30, 6}, {30, 5}, {30, 4}, {30, 3}, {30, 2}, {30, 1}
     };
-
-   
 }
 
 Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_fb(fb), m_r1(r1), m_r2(r2),
@@ -75,40 +79,48 @@ Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_f
 {
     // don't love this pattern, but we gotta move along
     m_list.push_back(std::make_tuple("blackout", std::bind(&Animations::blackout, this), nullptr));
-    m_list.push_back(std::make_tuple("whiteout", std::bind(&Animations::whiteout, this), &Framebuf::INCANDESCENT));
-    m_list.push_back(std::make_tuple("hard white", std::bind(&Animations::whiteout, this), &Framebuf::WHITE));
-    m_list.push_back(std::make_tuple("flash", std::bind(&Animations::flash, this), &Framebuf::INCANDESCENT));
+    m_list.push_back(std::make_tuple("25% white", std::bind(&Animations::whiteout, this, 0.25), &Framebuf::INCANDESCENT));
+    m_list.push_back(std::make_tuple("100% white", std::bind(&Animations::whiteout, this, 1.0), &Framebuf::INCANDESCENT));
+    m_list.push_back(std::make_tuple("impulse", std::bind(&Animations::impulse, this), nullptr));
+
     m_list.push_back(std::make_tuple("0 to 100", std::bind(&Animations::foo_to_full, this, 0.0, false), &Framebuf::INCANDESCENT));
-    m_list.push_back(std::make_tuple("50 to 100", std::bind(&Animations::foo_to_full, this, 0.5, false), &Framebuf::INCANDESCENT));
     m_list.push_back(std::make_tuple("top down", std::bind(&Animations::top_down_wave, this), &Framebuf::INCANDESCENT));
     m_list.push_back(std::make_tuple("left right", std::bind(&Animations::left_right_wave, this), &Framebuf::INCANDESCENT));
     m_list.push_back(std::make_tuple("TBGB all", std::bind(&Animations::TBGB, this, true), &Framebuf::INCANDESCENT));
     m_list.push_back(std::make_tuple("TBGB each", std::bind(&Animations::TBGB, this, false), &Framebuf::INCANDESCENT));
-    m_list.push_back(std::make_tuple("edge chase", std::bind(&Animations::edge_chase, this), &Framebuf::INCANDESCENT));
-    m_list.push_back(std::make_tuple("one by one", std::bind(&Animations::one_by_one, this), &Framebuf::INCANDESCENT));
+    m_list.push_back(std::make_tuple("flash", std::bind(&Animations::flash, this), &Framebuf::INCANDESCENT));
     m_list.push_back(std::make_tuple("inside out", std::bind(&Animations::inside_out, this), &Framebuf::INCANDESCENT));
     m_list.push_back(std::make_tuple("outside in", std::bind(&Animations::outside_in, this), &Framebuf::INCANDESCENT));
-    m_list.push_back(std::make_tuple("twinkle mono", std::bind(&Animations::twinkle, this, false), &Framebuf::INCANDESCENT));
-
-    m_list.push_back(std::make_tuple("twinkle color", std::bind(&Animations::twinkle, this, true), nullptr));
+    m_list.push_back(std::make_tuple("twinkle", std::bind(&Animations::twinkle, this, false), &Framebuf::INCANDESCENT));
+   
     m_list.push_back(std::make_tuple("rainbow", std::bind(&Animations::rainbow, this), nullptr));
     m_list.push_back(std::make_tuple("oscillate blue", std::bind(&Animations::foo_to_full, this, 0.0, true), &Framebuf::BLUE));
     m_list.push_back(std::make_tuple("oscillate red", std::bind(&Animations::foo_to_full, this, 0.0, true), &Framebuf::RED));
-    m_list.push_back(std::make_tuple("oscillate RBY", std::bind(&Animations::rotate3, this, &Framebuf::RED, &Framebuf::BLUE, &Framebuf::YELLOW), nullptr));
-#if 0
-    // this may or may not ever go away
-    m_list.push_back(std::make_pair("colorwheel", std::bind(&Animations::colorwheel, this)));
+    m_list.push_back(std::make_tuple("oscillate yel", std::bind(&Animations::foo_to_full, this, 0.0, true), &Framebuf::GREG));
+   
+    m_list.push_back(std::make_tuple("oscillate RBG", std::bind(&Animations::rotate3, this, &Framebuf::RED, &Framebuf::BLUE, &Framebuf::GREEN), nullptr));
+    m_list.push_back(std::make_tuple("pregame", std::bind(&Animations::pregame, this), nullptr));
+    m_list.push_back(std::make_tuple("hard white", std::bind(&Animations::whiteout, this, 1.0), &Framebuf::WHITE));
 
-    // this will go away, after proving out the framebuf, etc
+#if 0
+    // these next few were rejected during final test
+    m_list.push_back(std::make_tuple("edge chase", std::bind(&Animations::edge_chase, this), &Framebuf::INCANDESCENT));
+    m_list.push_back(std::make_tuple("one by one", std::bind(&Animations::one_by_one, this), &Framebuf::INCANDESCENT));
+    m_list.push_back(std::make_tuple("twinkle color", std::bind(&Animations::twinkle, this, true), nullptr));
+    m_list.push_back(std::make_tuple("oscillate RBY", std::bind(&Animations::rotate3, this, &Framebuf::RED, &Framebuf::BLUE, &Framebuf::YELLOW), nullptr));
+    m_list.push_back(std::make_tuple("50 to 100", std::bind(&Animations::foo_to_full, this, 0.5, false), &Framebuf::INCANDESCENT));
+
+
+    // debugging toys from here...
+    m_list.push_back(std::make_pair("colorwheel", std::bind(&Animations::colorwheel, this)));
     m_list.push_back(std::make_pair("linetest", std::bind(&Animations::linetest, this)));
-    // these will go away after proving DMX layout, etc
     m_list.push_back(std::make_pair("T1", std::bind(&Animations::one_letter_test, this, T1_START)));
     m_list.push_back(std::make_pair("B2", std::bind(&Animations::one_letter_test, this, B2_START)));
     m_list.push_back(std::make_pair("G3", std::bind(&Animations::one_letter_test, this, G3_START)));
     m_list.push_back(std::make_pair("B4", std::bind(&Animations::one_letter_test, this, B4_START)));
-
     m_list.push_back(std::make_pair("demo", std::bind(&Animations::demo, this)));
 #endif
+
     // probably some cute way to do this in the static namespace above but no time
     m_letter_perimeters = T1_PERIMETER;
     m_letter_perimeters.insert(m_letter_perimeters.end(), B2_PERIMETER.begin(), B2_PERIMETER.end());
@@ -228,15 +240,17 @@ Animations::blackout(void)
 }
 
 bool
-Animations::whiteout(void)
+Animations::whiteout(double percent)
 {
+    Framebuf::Color c = get_global_color();
+    dim(c, percent);
     {
         LOCK;
         for (int x = 0; x < TBGB_XMAX; x++)
         {
             for (int y = 0; y < TBGB_YMAX; y++)
             {
-                m_fb.data(x, y) = get_global_color();
+                m_fb.data(x, y) = c;
             }
         }
     }
@@ -247,10 +261,62 @@ Animations::whiteout(void)
 bool
 Animations::flash(void)
 {
-    if (!whiteout()) return false;
+    if (!whiteout(1.0)) return false;
     SLEEPMS(FLASH_DELAY);
     if (!blackout()) return false;
     SLEEPMS(FLASH_DELAY);
+    return true;
+}
+
+bool
+Animations::impulse()
+{
+    if (m_new && !blackout()) return false;
+
+    // START down to MID
+    for (double d = IMPULSE_START; d >= IMPULSE_MID; d -= ((IMPULSE_START-IMPULSE_MID) / IMPULSE_STEPS))
+    {
+        Framebuf::Color color = Framebuf::INCANDESCENT;
+        dim(color, d);
+        {
+            LOCK;
+            for (int x = 0; x < TBGB_XMAX; x++)
+            {
+                for (int y = 0; y < TBGB_YMAX; y++)
+                {
+                    m_fb.data(x, y) = color;
+                }
+            }
+        }
+        RENDER;
+        SLEEPMS(IMPULSE_DELAY);
+    }
+
+    // MID up to END
+    for (double d = IMPULSE_MID; d <= IMPULSE_END; d += ((IMPULSE_END-IMPULSE_MID) / IMPULSE_STEPS/2))
+    {
+        Framebuf::Color color = Framebuf::INCANDESCENT;
+        dim(color, d);
+        {
+            LOCK;
+            for (int x = 0; x < TBGB_XMAX; x++)
+            {
+                for (int y = 0; y < TBGB_YMAX; y++)
+                {
+                    m_fb.data(x, y) = color;
+                }
+            }
+        }
+        RENDER;
+        SLEEPMS(IMPULSE_DELAY);
+    }
+
+    // give the operator 3 second to change gears
+    for (int i = 0; i < 600; i++)
+    {
+        RENDER;
+        SLEEPMS(5);
+    }
     return true;
 }
 
@@ -577,6 +643,49 @@ Animations::twinkle(bool color)
 }
 
 bool
+Animations::pregame()
+{
+    if (m_new && !blackout()) return false;
+
+    {
+        LOCK;
+        for (int x = 0; x < TBGB_XMAX; x++)
+        {
+            for (int y = 0; y < TBGB_YMAX; y++)
+            {
+                // this is hardcoded, don't consult the global color
+                m_fb.data(x, y) = Framebuf::DIM;
+            }
+        }
+    }
+    RENDER;
+
+    // sow chaos
+    for (int q = 0; q < 50; q++)
+    {
+        // flicker the G
+        Framebuf::Color flicker = Framebuf::BLACK;
+        if (random_num(1, 10) <= 3)
+            flicker = Framebuf::DIM;
+        {
+            LOCK;
+            for (int x = G3_START; x < G3_START + LETTER_WIDTH; x++)
+            {
+                for (int y = 0; y < TBGB_YMAX; y++)
+                {
+                    m_fb.data(x, y) = Framebuf::BLACK;
+                }
+            }
+        }
+    }
+    RENDER;
+    SLEEPMS(10);
+
+    return true;
+
+}
+
+bool
 Animations::rainbow(void)
 {
     if (!blackout()) return false;
@@ -683,7 +792,6 @@ Animations::rotate3(const Framebuf::Color* one, const Framebuf::Color* two, cons
         SLEEPMS(ROTATE3_STEPS);
         red += dr; green += dg; blue += db;
     }
-
 
     return true;
 }
