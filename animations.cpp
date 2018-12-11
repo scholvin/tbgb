@@ -63,7 +63,8 @@ namespace {
 }
 
 Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_fb(fb), m_r1(r1), m_r2(r2),
-    m_canceling(false),
+    m_canceling(false), 
+    m_new(true),
     m_color(Framebuf::BLACK),
     m_master(1),
     m_gen(m_rd()),
@@ -158,10 +159,12 @@ Animations::render()
     if (m_canceling)
     {
         m_canceling = false;
+        m_new = true;
         return false;
     }
     if (m_r1) m_r1();
     if (m_r2) m_r2();
+    m_new = false;
     return true;
 }
 
@@ -254,6 +257,7 @@ Animations::flash(void)
 bool
 Animations::foo_to_full(double start, bool oscillate)
 {
+    if (m_new && !blackout()) return false;
     for (double d = start; d <= 1.0; d += (1.0 - start) / FOO_TO_FULL_STEPS)
     {
         Framebuf::Color color = get_global_color();
@@ -521,7 +525,7 @@ Animations::twinkle(bool color)
         m_last_twinkle_color = color;
     }
 
-    if (!blackout()) return false;
+    if (m_new && !blackout()) return false;
 
     // generate a new point and color, put on deques
     auto add_star = [this, &color]() {      
@@ -575,6 +579,7 @@ Animations::twinkle(bool color)
 bool
 Animations::rainbow(void)
 {
+    if (!blackout()) return false;
     int CMAX = 6;
     m_rainbow_lastc = (m_rainbow_lastc + 1 ) % CMAX;
     int c = m_rainbow_lastc;
@@ -595,7 +600,7 @@ Animations::rainbow(void)
 bool
 Animations::rotate3(const Framebuf::Color* one, const Framebuf::Color* two, const Framebuf::Color* three)
 {
-    if (!blackout()) return false;
+    if (m_new && !blackout()) return false;
     double red, green, blue, dr, dg, db;;
 
     dr = (two->get_red() - one->get_red()) / ROTATE3_STEPS;

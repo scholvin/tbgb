@@ -58,6 +58,9 @@ private:
     // is an animation canceling?
     std::atomic<bool> m_canceling;
 
+    // is an animation newly changed (to do something different on first render)
+    std::atomic<bool> m_new;
+
     std::mutex m_colorMutex;
     Gdk::RGBA m_color;
 
