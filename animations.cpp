@@ -96,7 +96,7 @@ Animations::Animations(Framebuf& fb, RenderFuncType r1, RenderFuncType r2) : m_f
     m_list.push_back(std::make_tuple("rainbow", std::bind(&Animations::rainbow, this), nullptr));
     m_list.push_back(std::make_tuple("oscillate blue", std::bind(&Animations::foo_to_full, this, 0.0, true), &Framebuf::BLUE));
     m_list.push_back(std::make_tuple("oscillate red", std::bind(&Animations::foo_to_full, this, 0.0, true), &Framebuf::RED));
-    m_list.push_back(std::make_tuple("oscillate yel", std::bind(&Animations::foo_to_full, this, 0.0, true), &Framebuf::GREG));
+    m_list.push_back(std::make_tuple("oscillate yellow", std::bind(&Animations::foo_to_full, this, 0.0, true), &Framebuf::GREG));
    
     m_list.push_back(std::make_tuple("oscillate RBG", std::bind(&Animations::rotate3, this, &Framebuf::RED, &Framebuf::BLUE, &Framebuf::GREEN), nullptr));
     m_list.push_back(std::make_tuple("pregame", std::bind(&Animations::pregame, this), nullptr));
