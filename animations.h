@@ -50,7 +50,11 @@ public:
     bool rotate3(const Framebuf::Color* one, const Framebuf::Color* two, const Framebuf::Color* three);
 
     // for points...
-    struct _pt { int x, y; };
+    struct _pt 
+    { 
+        int x, y; 
+        bool operator==(const _pt& other) const { return x == other.x && y == other.y; };
+    };
 
 private:
     Framebuf& m_fb;

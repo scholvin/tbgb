@@ -25,7 +25,8 @@ namespace {
     const int TWINKLE_MAX_DELAY = 150;
     const int ROTATE3_STEPS = 50;
     const int ROTATE3_DELAY = 10;
-    const double PREGAME_DIM = 0.03;
+    const int PREGAME_NORMAL_DELAY = 10;
+    const int PREGAME_FLICKER_DELAY = 2;
 
     const std::vector<Animations::_pt> T1_PERIMETER = {
         {0, 0}, {1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0},
@@ -647,14 +648,31 @@ Animations::pregame()
 {
     if (m_new && !blackout()) return false;
 
+    // this is hardcoded, don't consult the global color
+    const Framebuf::Color BASE = Framebuf::DIM;
+    const std::vector<_pt> DEAD = { {3, 6}, {5, 14}, {8, 0}, {11, 1}, {17, 3}, {17, 4}, {17, 5}, 
+                                    {30, 12}, { 32, 3}, {36, 6}, {37, 6} };
+    const _pt HOT = {38, 6};
     {
         LOCK;
         for (int x = 0; x < TBGB_XMAX; x++)
         {
             for (int y = 0; y < TBGB_YMAX; y++)
             {
-                // this is hardcoded, don't consult the global color
-                m_fb.data(x, y) = Framebuf::DIM;
+                if (y == 16 || std::find(DEAD.begin(), DEAD.end(), _pt{x,y}) != DEAD.end())
+                {
+                    m_fb.data(x, y) = Framebuf::BLACK;
+                }
+                else if (_pt{x, y} == HOT)
+                {
+                    Framebuf::Color c = Framebuf::INCANDESCENT;
+                    dim(c, 0.25);
+                    m_fb.data(x, y) = c;
+                }
+                else
+                {
+                    m_fb.data(x, y) = BASE;
+                }
             }
         }
     }
@@ -663,10 +681,9 @@ Animations::pregame()
     // sow chaos
     for (int q = 0; q < 50; q++)
     {
-        // flicker the G
-        Framebuf::Color flicker = Framebuf::BLACK;
-        if (random_num(1, 10) <= 3)
-            flicker = Framebuf::DIM;
+        int delay = PREGAME_NORMAL_DELAY;
+        // flicker the G - go black a small percentage of the time
+        if (random_num(1, 1000) <= 4)
         {
             LOCK;
             for (int x = G3_START; x < G3_START + LETTER_WIDTH; x++)
@@ -674,15 +691,15 @@ Animations::pregame()
                 for (int y = 0; y < TBGB_YMAX; y++)
                 {
                     m_fb.data(x, y) = Framebuf::BLACK;
+                    delay = PREGAME_FLICKER_DELAY;
                 }
             }
         }
+        RENDER;
+        SLEEPMS(delay);
     }
-    RENDER;
-    SLEEPMS(10);
 
     return true;
-
 }
 
 bool
