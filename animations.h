@@ -4,6 +4,7 @@
 #include <string>
 #include <utility>
 #include <random>
+#include <atomic>
 #include "framebuf.h"
 
 // home to the animation code
